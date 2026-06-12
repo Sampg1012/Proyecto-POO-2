@@ -1,0 +1,4 @@
+Cambios agregados:
+- GeneradorVuelos.java
+- CatalogoDatos usado como fuente de destinos, aerolineas, escalas y tarifas.
+- Ejecutar GeneradorVuelos desde la inicializacion del sistema para crear vuelos y guardarlos en vuelos.dat.

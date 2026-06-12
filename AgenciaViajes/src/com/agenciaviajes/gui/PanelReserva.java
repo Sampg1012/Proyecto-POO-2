@@ -1,0 +1,540 @@
+package com.agenciaviajes.gui;
+
+import com.agenciaviajes.modelo.*;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+
+/**
+ * Pantalla para crear una nueva reserva. Permite:
+ * 1) Agregar vuelos al itinerario (a partir del id del vuelo).
+ * 2) Agregar pasajeros (adulto, nino o adulto mayor).
+ * 3) Asignar asientos disponibles a cada pasajero.
+ * 4) Confirmar la reserva, calculando el valor informativo total.
+ */
+public class PanelReserva extends JPanel {
+
+    private final VentanaPrincipal ventana;
+    private final AgenciaViajes agencia;
+    private Reserva reservaActual;
+
+    // Itinerario
+    private final JTextField txtIdVuelo;
+    private final DefaultTableModel modeloItinerario;
+    private final JTable tablaItinerario;
+
+    // Pasajeros
+    private final JTextField txtPasId;
+    private final JTextField txtPasNombre;
+    private final JTextField txtPasEdad;
+    private final JTextField txtPasContacto;
+    private final JComboBox<String> cmbTipoPasajero;
+    private final JTextField txtCampoExtra; // acompanante (Nino) o asistencia (AdultoMayor: si/no)
+    private final JLabel lblCampoExtra;
+    private final DefaultTableModel modeloPasajeros;
+    private final JTable tablaPasajeros;
+
+    // Asientos
+    private final JComboBox<String> cmbVueloAsiento;
+    private final JComboBox<String> cmbPasajeroAsiento;
+    private final JComboBox<String> cmbAsientoDisponible;
+    private final DefaultTableModel modeloAsientos;
+    private final JTable tablaAsientos;
+
+    private final JLabel lblTotal;
+
+    public PanelReserva(VentanaPrincipal ventana, AgenciaViajes agencia) {
+        this.ventana = ventana;
+        this.agencia = agencia;
+
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel titulo = new JLabel("Crear Reserva", SwingConstants.CENTER);
+        titulo.setFont(new Font("SansSerif", Font.BOLD, 20));
+        add(titulo, BorderLayout.NORTH);
+
+        JTabbedPane pestañas = new JTabbedPane();
+
+        // ============== Pestaña 1: Itinerario ==============
+        JPanel panelItinerario = new JPanel(new BorderLayout(10, 10));
+        JPanel panelAgregarVuelo = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelAgregarVuelo.add(new JLabel("ID del vuelo a agregar:"));
+        txtIdVuelo = new JTextField(8);
+        panelAgregarVuelo.add(txtIdVuelo);
+        JButton btnAgregarVuelo = new JButton("Agregar al itinerario");
+        JButton btnQuitarVuelo = new JButton("Quitar vuelo seleccionado");
+        panelAgregarVuelo.add(btnAgregarVuelo);
+        panelAgregarVuelo.add(btnQuitarVuelo);
+
+        modeloItinerario = new DefaultTableModel(
+                new String[]{"ID", "Origen", "Destino", "Fecha", "Salida", "Llegada", "Tarifa final", "Tipo"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tablaItinerario = new JTable(modeloItinerario);
+
+        panelItinerario.add(panelAgregarVuelo, BorderLayout.NORTH);
+        panelItinerario.add(new JScrollPane(tablaItinerario), BorderLayout.CENTER);
+        pestañas.addTab("1. Itinerario", panelItinerario);
+
+        // ============== Pestaña 2: Pasajeros ==============
+        JPanel panelPasajeros = new JPanel(new BorderLayout(10, 10));
+        JPanel panelFormPasajero = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        panelFormPasajero.add(new JLabel("Tipo de pasajero:"), gbc);
+        cmbTipoPasajero = new JComboBox<>(new String[]{"Adulto", "Nino", "Adulto Mayor"});
+        gbc.gridx = 1;
+        panelFormPasajero.add(cmbTipoPasajero, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        panelFormPasajero.add(new JLabel("ID / Identificacion:"), gbc);
+        txtPasId = new JTextField(10);
+        gbc.gridx = 1;
+        panelFormPasajero.add(txtPasId, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 2;
+        panelFormPasajero.add(new JLabel("Nombre:"), gbc);
+        txtPasNombre = new JTextField(15);
+        gbc.gridx = 1;
+        panelFormPasajero.add(txtPasNombre, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 3;
+        panelFormPasajero.add(new JLabel("Edad:"), gbc);
+        txtPasEdad = new JTextField(5);
+        gbc.gridx = 1;
+        panelFormPasajero.add(txtPasEdad, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 4;
+        panelFormPasajero.add(new JLabel("Contacto:"), gbc);
+        txtPasContacto = new JTextField(15);
+        gbc.gridx = 1;
+        panelFormPasajero.add(txtPasContacto, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 5;
+        lblCampoExtra = new JLabel("Acompanante (Nino):");
+        panelFormPasajero.add(lblCampoExtra, gbc);
+        txtCampoExtra = new JTextField(15);
+        gbc.gridx = 1;
+        panelFormPasajero.add(txtCampoExtra, gbc);
+
+        JButton btnAgregarPasajero = new JButton("Agregar pasajero");
+        JButton btnQuitarPasajero = new JButton("Quitar pasajero seleccionado");
+        gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
+        JPanel panelBotonesPasajero = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelBotonesPasajero.add(btnAgregarPasajero);
+        panelBotonesPasajero.add(btnQuitarPasajero);
+        panelFormPasajero.add(panelBotonesPasajero, gbc);
+
+        modeloPasajeros = new DefaultTableModel(
+                new String[]{"Tipo", "ID", "Nombre", "Edad", "Contacto", "Detalle"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tablaPasajeros = new JTable(modeloPasajeros);
+
+        panelPasajeros.add(panelFormPasajero, BorderLayout.NORTH);
+        panelPasajeros.add(new JScrollPane(tablaPasajeros), BorderLayout.CENTER);
+        pestañas.addTab("2. Pasajeros", panelPasajeros);
+
+        cmbTipoPasajero.addActionListener(e -> actualizarCampoExtra());
+
+        // ============== Pestaña 3: Asientos ==============
+        JPanel panelAsientos = new JPanel(new BorderLayout(10, 10));
+        JPanel panelFormAsiento = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc2 = new GridBagConstraints();
+        gbc2.insets = new Insets(5, 5, 5, 5);
+        gbc2.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc2.gridx = 0; gbc2.gridy = 0;
+        panelFormAsiento.add(new JLabel("Vuelo:"), gbc2);
+        cmbVueloAsiento = new JComboBox<>();
+        gbc2.gridx = 1;
+        panelFormAsiento.add(cmbVueloAsiento, gbc2);
+
+        gbc2.gridx = 0; gbc2.gridy = 1;
+        panelFormAsiento.add(new JLabel("Pasajero:"), gbc2);
+        cmbPasajeroAsiento = new JComboBox<>();
+        gbc2.gridx = 1;
+        panelFormAsiento.add(cmbPasajeroAsiento, gbc2);
+
+        gbc2.gridx = 0; gbc2.gridy = 2;
+        panelFormAsiento.add(new JLabel("Asiento disponible:"), gbc2);
+        cmbAsientoDisponible = new JComboBox<>();
+        gbc2.gridx = 1;
+        panelFormAsiento.add(cmbAsientoDisponible, gbc2);
+
+        JButton btnCargarAsientos = new JButton("Cargar asientos disponibles");
+        JButton btnAsignarAsiento = new JButton("Asignar asiento");
+        gbc2.gridx = 0; gbc2.gridy = 3; gbc2.gridwidth = 2;
+        JPanel panelBotonesAsiento = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelBotonesAsiento.add(btnCargarAsientos);
+        panelBotonesAsiento.add(btnAsignarAsiento);
+        panelFormAsiento.add(panelBotonesAsiento, gbc2);
+
+        modeloAsientos = new DefaultTableModel(
+                new String[]{"Pasajero", "Vuelo", "Asiento", "Categoria", "Servicios incluidos"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        tablaAsientos = new JTable(modeloAsientos);
+
+        panelAsientos.add(panelFormAsiento, BorderLayout.NORTH);
+        panelAsientos.add(new JScrollPane(tablaAsientos), BorderLayout.CENTER);
+        pestañas.addTab("3. Asientos", panelAsientos);
+
+        add(pestañas, BorderLayout.CENTER);
+
+        // ============== Panel inferior: total y confirmar ==============
+        JPanel panelInferior = new JPanel(new BorderLayout(10, 10));
+        lblTotal = new JLabel("Valor informativo total: $0.00", SwingConstants.CENTER);
+        lblTotal.setFont(new Font("SansSerif", Font.BOLD, 16));
+        panelInferior.add(lblTotal, BorderLayout.NORTH);
+
+        JPanel panelBotonesFinales = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
+        JButton btnCalcularTotal = new JButton("Calcular total");
+        JButton btnConfirmar = new JButton("Confirmar reserva");
+        JButton btnVolver = new JButton("Volver al menu");
+        panelBotonesFinales.add(btnCalcularTotal);
+        panelBotonesFinales.add(btnConfirmar);
+        panelBotonesFinales.add(btnVolver);
+        panelInferior.add(panelBotonesFinales, BorderLayout.SOUTH);
+
+        add(panelInferior, BorderLayout.SOUTH);
+
+        // ============== Eventos ==============
+        btnAgregarVuelo.addActionListener(e -> agregarVueloAlItinerario());
+        btnQuitarVuelo.addActionListener(e -> quitarVueloDelItinerario());
+        btnAgregarPasajero.addActionListener(e -> agregarPasajero());
+        btnQuitarPasajero.addActionListener(e -> quitarPasajero());
+        btnCargarAsientos.addActionListener(e -> cargarAsientosDisponibles());
+        btnAsignarAsiento.addActionListener(e -> asignarAsiento());
+        btnCalcularTotal.addActionListener(e -> actualizarTotal());
+        btnConfirmar.addActionListener(e -> confirmarReserva());
+        btnVolver.addActionListener(e -> {
+            int confirmacion = JOptionPane.showConfirmDialog(this,
+                    "Si vuelve al menu sin confirmar, la reserva en progreso se descartara. Desea continuar?",
+                    "Confirmar", JOptionPane.YES_NO_OPTION);
+            if (confirmacion == JOptionPane.YES_OPTION) {
+                descartarReservaEnProgreso();
+                ventana.mostrarPanel(VentanaPrincipal.PANEL_MENU);
+            }
+        });
+
+        actualizarCampoExtra();
+    }
+
+    /**
+     * Se ejecuta cada vez que se muestra el panel: crea una nueva reserva en progreso.
+     */
+    public void actualizar() {
+        if (agencia.getUsuarioActual() == null) {
+            return;
+        }
+        reservaActual = agencia.crearReserva();
+        modeloItinerario.setRowCount(0);
+        modeloPasajeros.setRowCount(0);
+        modeloAsientos.setRowCount(0);
+        cmbVueloAsiento.removeAllItems();
+        cmbPasajeroAsiento.removeAllItems();
+        cmbAsientoDisponible.removeAllItems();
+        lblTotal.setText("Valor informativo total: $0.00");
+        txtIdVuelo.setText("");
+        txtPasId.setText("");
+        txtPasNombre.setText("");
+        txtPasEdad.setText("");
+        txtPasContacto.setText("");
+        txtCampoExtra.setText("");
+    }
+
+    private void actualizarCampoExtra() {
+        String tipo = (String) cmbTipoPasajero.getSelectedItem();
+        if ("Nino".equals(tipo)) {
+            lblCampoExtra.setText("Acompanante (Nino):");
+            txtCampoExtra.setEnabled(true);
+        } else if ("Adulto Mayor".equals(tipo)) {
+            lblCampoExtra.setText("Requiere asistencia? (si/no):");
+            txtCampoExtra.setEnabled(true);
+        } else {
+            lblCampoExtra.setText("No aplica:");
+            txtCampoExtra.setEnabled(false);
+            txtCampoExtra.setText("");
+        }
+    }
+
+    private void agregarVueloAlItinerario() {
+        if (!validarReservaActiva()) return;
+
+        String id = txtIdVuelo.getText().trim();
+        if (id.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese el ID del vuelo.",
+                    "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        Vuelo vuelo = agencia.buscarVueloPorId(id);
+        if (vuelo == null) {
+            JOptionPane.showMessageDialog(this, "No existe un vuelo con ese ID.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (reservaActual.getItinerario().getVuelos().contains(vuelo)) {
+            JOptionPane.showMessageDialog(this, "Ese vuelo ya esta en el itinerario.",
+                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        reservaActual.getItinerario().agregarVuelo(vuelo);
+        modeloItinerario.addRow(new Object[]{
+                vuelo.getId(), vuelo.getOrigen(), vuelo.getDestino(),
+                vuelo.getFecha(), vuelo.getHoraSalida(), vuelo.getHoraLlegada(),
+                String.format("$%.2f", vuelo.calcularTarifaFinal()), vuelo.getTipoVuelo()
+        });
+        cmbVueloAsiento.addItem(vuelo.getId());
+        txtIdVuelo.setText("");
+        actualizarTotal();
+    }
+
+    private void quitarVueloDelItinerario() {
+        int fila = tablaItinerario.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione un vuelo de la tabla.",
+                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        String id = (String) modeloItinerario.getValueAt(fila, 0);
+        Vuelo vuelo = agencia.buscarVueloPorId(id);
+        if (vuelo != null) {
+            reservaActual.getItinerario().eliminarVuelo(vuelo);
+            cmbVueloAsiento.removeItem(id);
+        }
+        modeloItinerario.removeRow(fila);
+        actualizarTotal();
+    }
+
+    private void agregarPasajero() {
+        if (!validarReservaActiva()) return;
+
+        String id = txtPasId.getText().trim();
+        String nombre = txtPasNombre.getText().trim();
+        String edadTexto = txtPasEdad.getText().trim();
+        String contacto = txtPasContacto.getText().trim();
+        String tipo = (String) cmbTipoPasajero.getSelectedItem();
+        String extra = txtCampoExtra.getText().trim();
+
+        if (id.isEmpty() || nombre.isEmpty() || edadTexto.isEmpty() || contacto.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Complete todos los campos obligatorios.",
+                    "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int edad;
+        try {
+            edad = Integer.parseInt(edadTexto);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "La edad debe ser un numero entero.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Pasajero pasajero;
+        String detalle;
+        switch (tipo) {
+            case "Nino":
+                if (extra.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Debe indicar el acompanante del nino.",
+                            "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                pasajero = new Nino(id, nombre, edad, contacto, extra);
+                detalle = "Acompanante: " + extra;
+                break;
+            case "Adulto Mayor":
+                boolean requiereAsistencia = extra.equalsIgnoreCase("si") || extra.equalsIgnoreCase("s");
+                pasajero = new AdultoMayor(id, nombre, edad, contacto, requiereAsistencia);
+                detalle = "Asistencia: " + (requiereAsistencia ? "Si" : "No");
+                break;
+            default:
+                pasajero = new Adulto(id, nombre, edad, contacto);
+                detalle = "-";
+                break;
+        }
+
+        boolean agregado = reservaActual.agregarPasajero(pasajero);
+        if (!agregado) {
+            JOptionPane.showMessageDialog(this,
+                    "Los datos del pasajero no son validos para el tipo seleccionado "
+                            + "(verifique la edad segun el tipo de pasajero).",
+                    "Datos invalidos", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        modeloPasajeros.addRow(new Object[]{pasajero.getTipo(), pasajero.getId(),
+                pasajero.getNombre(), pasajero.getEdad(), pasajero.getContacto(), detalle});
+        cmbPasajeroAsiento.addItem(pasajero.getId() + " - " + pasajero.getNombre());
+
+        txtPasId.setText("");
+        txtPasNombre.setText("");
+        txtPasEdad.setText("");
+        txtPasContacto.setText("");
+        txtCampoExtra.setText("");
+    }
+
+    private void quitarPasajero() {
+        int fila = tablaPasajeros.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione un pasajero de la tabla.",
+                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        String id = (String) modeloPasajeros.getValueAt(fila, 1);
+        Pasajero pasajero = reservaActual.getPasajeros().stream()
+                .filter(p -> p.getId().equals(id)).findFirst().orElse(null);
+        if (pasajero != null) {
+            reservaActual.eliminarPasajero(pasajero);
+            for (int i = 0; i < cmbPasajeroAsiento.getItemCount(); i++) {
+                if (cmbPasajeroAsiento.getItemAt(i).startsWith(id + " - ")) {
+                    cmbPasajeroAsiento.removeItemAt(i);
+                    break;
+                }
+            }
+        }
+        modeloPasajeros.removeRow(fila);
+    }
+
+    private void cargarAsientosDisponibles() {
+        String idVuelo = (String) cmbVueloAsiento.getSelectedItem();
+        if (idVuelo == null) {
+            JOptionPane.showMessageDialog(this, "Agregue primero un vuelo al itinerario.",
+                    "Aviso", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        Vuelo vuelo = agencia.buscarVueloPorId(idVuelo);
+        cmbAsientoDisponible.removeAllItems();
+        if (vuelo == null) return;
+
+        List<Asiento> disponibles = vuelo.obtenerAsientosDisponibles();
+        if (disponibles.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay asientos disponibles en este vuelo.",
+                    "Sin disponibilidad", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        for (Asiento a : disponibles) {
+            cmbAsientoDisponible.addItem(a.getNumero() + " (" + a.getCategoria() + ")");
+        }
+    }
+
+    private void asignarAsiento() {
+        String idVuelo = (String) cmbVueloAsiento.getSelectedItem();
+        String pasajeroSel = (String) cmbPasajeroAsiento.getSelectedItem();
+        String asientoSel = (String) cmbAsientoDisponible.getSelectedItem();
+
+        if (idVuelo == null || pasajeroSel == null || asientoSel == null) {
+            JOptionPane.showMessageDialog(this,
+                    "Seleccione vuelo, pasajero y asiento.",
+                    "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Vuelo vuelo = agencia.buscarVueloPorId(idVuelo);
+        String idPasajero = pasajeroSel.split(" - ")[0];
+        Pasajero pasajero = reservaActual.getPasajeros().stream()
+                .filter(p -> p.getId().equals(idPasajero)).findFirst().orElse(null);
+
+        String numeroAsiento = asientoSel.split(" ")[0];
+        Asiento asiento = vuelo.getAsientos().stream()
+                .filter(a -> a.getNumero().equals(numeroAsiento)).findFirst().orElse(null);
+
+        if (pasajero == null || asiento == null) {
+            JOptionPane.showMessageDialog(this, "No se encontro el pasajero o el asiento.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        boolean asignado = reservaActual.asignarAsientoAPasajero(pasajero, asiento);
+        if (!asignado) {
+            JOptionPane.showMessageDialog(this,
+                    "No fue posible asignar el asiento (puede que ya este ocupado o ya tenga uno asignado).",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        modeloAsientos.addRow(new Object[]{
+                pasajero.getNombre(), vuelo.getId(), asiento.getNumero(),
+                asiento.getCategoria(), asiento.getServicios()
+        });
+
+        cargarAsientosDisponibles();
+    }
+
+    private void actualizarTotal() {
+        if (reservaActual == null) {
+            lblTotal.setText("Valor informativo total: $0.00");
+            return;
+        }
+        lblTotal.setText(String.format("Valor informativo total: $%.2f", reservaActual.calcularTotal()));
+    }
+
+    private void confirmarReserva() {
+        if (!validarReservaActiva()) return;
+
+        if (reservaActual.getItinerario().estaVacio()) {
+            JOptionPane.showMessageDialog(this, "Debe agregar al menos un vuelo al itinerario.",
+                    "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (reservaActual.getPasajeros().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debe agregar al menos un pasajero.",
+                    "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        boolean confirmada = reservaActual.confirmarReserva();
+        if (confirmada) {
+            actualizarTotal();
+            JOptionPane.showMessageDialog(this,
+                    "Reserva " + reservaActual.getId() + " confirmada con exito.\n"
+                            + String.format("Valor informativo total: $%.2f", reservaActual.calcularTotal()),
+                    "Reserva confirmada", JOptionPane.INFORMATION_MESSAGE);
+            ventana.guardarDatos();
+            reservaActual = null;
+            ventana.mostrarPanel(VentanaPrincipal.PANEL_MIS_RESERVAS);
+        } else {
+            JOptionPane.showMessageDialog(this, "No fue posible confirmar la reserva.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Si el usuario abandona la pantalla sin confirmar, se elimina la reserva
+     * vacia que se habia creado al entrar, liberando los asientos asignados.
+     */
+    private void descartarReservaEnProgreso() {
+        if (reservaActual == null) return;
+        reservaActual.cancelar();
+        agencia.getReservas().remove(reservaActual);
+        agencia.getUsuarioActual().getReservas().remove(reservaActual);
+        reservaActual = null;
+    }
+
+    private boolean validarReservaActiva() {
+        if (reservaActual == null) {
+            JOptionPane.showMessageDialog(this,
+                    "No hay una reserva en progreso. Vuelva al menu e intente de nuevo.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        return true;
+    }
+}
