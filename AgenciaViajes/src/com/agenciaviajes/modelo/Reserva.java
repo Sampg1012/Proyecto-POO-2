@@ -126,10 +126,33 @@ public class Reserva implements Serializable {
 
     /**
      * Calcula el valor informativo total de la reserva con base en las tarifas
-     * de referencia de los vuelos del itinerario.
+     * de referencia de los vuelos del itinerario, sumando el recargo
+     * correspondiente a la categoria de cada asiento asignado (Economica,
+     * Ejecutiva o Primera Clase). De esta manera, la categoria elegida por
+     * el pasajero influye en el valor final de la reserva.
      */
     public double calcularTotal() {
-        return itinerario.calcularCostoTotal();
+        double total = itinerario.calcularCostoTotal();
+        for (Asiento asiento : asientosAsignados.values()) {
+            Vuelo vuelo = buscarVueloDelAsiento(asiento);
+            if (vuelo != null) {
+                total += asiento.calcularRecargo(vuelo.calcularTarifaFinal());
+            }
+        }
+        return total;
+    }
+
+    /**
+     * Busca, dentro de los vuelos del itinerario, a cual de ellos pertenece
+     * el asiento indicado (cada asiento pertenece a un unico vuelo).
+     */
+    private Vuelo buscarVueloDelAsiento(Asiento asiento) {
+        for (Vuelo vuelo : itinerario.getVuelos()) {
+            if (vuelo.getAsientos().contains(asiento)) {
+                return vuelo;
+            }
+        }
+        return null;
     }
 
     /**

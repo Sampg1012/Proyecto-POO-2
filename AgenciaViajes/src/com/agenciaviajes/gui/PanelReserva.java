@@ -1,11 +1,10 @@
 package com.agenciaviajes.gui;
 
 import com.agenciaviajes.modelo.*;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * Pantalla para crear una nueva reserva. Permite:
@@ -39,6 +38,7 @@ public class PanelReserva extends JPanel {
     // Asientos
     private final JComboBox<String> cmbVueloAsiento;
     private final JComboBox<String> cmbPasajeroAsiento;
+    private final JComboBox<String> cmbCategoriaAsiento;
     private final JComboBox<String> cmbAsientoDisponible;
     private final DefaultTableModel modeloAsientos;
     private final JTable tablaAsientos;
@@ -169,6 +169,12 @@ public class PanelReserva extends JPanel {
         panelFormAsiento.add(cmbPasajeroAsiento, gbc2);
 
         gbc2.gridx = 0; gbc2.gridy = 2;
+        panelFormAsiento.add(new JLabel("Categoria de asiento:"), gbc2);
+        cmbCategoriaAsiento = new JComboBox<>(new String[]{"Todas", "Economica", "Ejecutiva", "Primera Clase"});
+        gbc2.gridx = 1;
+        panelFormAsiento.add(cmbCategoriaAsiento, gbc2);
+
+        gbc2.gridx = 0; gbc2.gridy = 3;
         panelFormAsiento.add(new JLabel("Asiento disponible:"), gbc2);
         cmbAsientoDisponible = new JComboBox<>();
         gbc2.gridx = 1;
@@ -176,14 +182,14 @@ public class PanelReserva extends JPanel {
 
         JButton btnCargarAsientos = new JButton("Cargar asientos disponibles");
         JButton btnAsignarAsiento = new JButton("Asignar asiento");
-        gbc2.gridx = 0; gbc2.gridy = 3; gbc2.gridwidth = 2;
+        gbc2.gridx = 0; gbc2.gridy = 4; gbc2.gridwidth = 2;
         JPanel panelBotonesAsiento = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panelBotonesAsiento.add(btnCargarAsientos);
         panelBotonesAsiento.add(btnAsignarAsiento);
         panelFormAsiento.add(panelBotonesAsiento, gbc2);
 
         modeloAsientos = new DefaultTableModel(
-                new String[]{"Pasajero", "Vuelo", "Asiento", "Categoria", "Servicios incluidos"}, 0) {
+                new String[]{"Pasajero", "Vuelo", "Asiento", "Categoria", "Recargo categoria", "Servicios incluidos"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
@@ -220,6 +226,7 @@ public class PanelReserva extends JPanel {
         btnAgregarPasajero.addActionListener(e -> agregarPasajero());
         btnQuitarPasajero.addActionListener(e -> quitarPasajero());
         btnCargarAsientos.addActionListener(e -> cargarAsientosDisponibles());
+        cmbCategoriaAsiento.addActionListener(e -> cargarAsientosDisponibles());
         btnAsignarAsiento.addActionListener(e -> asignarAsiento());
         btnCalcularTotal.addActionListener(e -> actualizarTotal());
         btnConfirmar.addActionListener(e -> confirmarReserva());
@@ -249,6 +256,7 @@ public class PanelReserva extends JPanel {
         modeloAsientos.setRowCount(0);
         cmbVueloAsiento.removeAllItems();
         cmbPasajeroAsiento.removeAllItems();
+        cmbCategoriaAsiento.setSelectedIndex(0);
         cmbAsientoDisponible.removeAllItems();
         lblTotal.setText("Valor informativo total: $0.00");
         txtIdVuelo.setText("");
@@ -424,14 +432,22 @@ public class PanelReserva extends JPanel {
         cmbAsientoDisponible.removeAllItems();
         if (vuelo == null) return;
 
+        String categoriaFiltro = (String) cmbCategoriaAsiento.getSelectedItem();
         List<Asiento> disponibles = vuelo.obtenerAsientosDisponibles();
+        if (categoriaFiltro != null && !categoriaFiltro.equals("Todas")) {
+            disponibles = disponibles.stream()
+                    .filter(a -> a.getCategoria().equalsIgnoreCase(categoriaFiltro))
+                    .toList();
+        }
         if (disponibles.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No hay asientos disponibles en este vuelo.",
+            JOptionPane.showMessageDialog(this, "No hay asientos disponibles para esa categoria en este vuelo.",
                     "Sin disponibilidad", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
+        double tarifaVuelo = vuelo.calcularTarifaFinal();
         for (Asiento a : disponibles) {
-            cmbAsientoDisponible.addItem(a.getNumero() + " (" + a.getCategoria() + ")");
+            String precio = String.format("$%.0f", a.calcularPrecio(tarifaVuelo));
+            cmbAsientoDisponible.addItem(a.getNumero() + " (" + a.getCategoria() + " - " + precio + ")");
         }
     }
 
@@ -472,10 +488,13 @@ public class PanelReserva extends JPanel {
 
         modeloAsientos.addRow(new Object[]{
                 pasajero.getNombre(), vuelo.getId(), asiento.getNumero(),
-                asiento.getCategoria(), asiento.getServicios()
+                asiento.getCategoria(),
+                String.format("$%.0f", asiento.calcularRecargo(vuelo.calcularTarifaFinal())),
+                asiento.getServicios()
         });
 
         cargarAsientosDisponibles();
+        actualizarTotal();
     }
 
     private void actualizarTotal() {

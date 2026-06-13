@@ -27,4 +27,9 @@ public class Ejecutivo extends Asiento {
     public String getServicios() {
         return accesoSalaVip() + " + 2 piezas de equipaje (hasta 23 kg c/u)";
     }
+
+    @Override
+    public double getFactorPrecio() {
+    return 1.8;
+}
 }
