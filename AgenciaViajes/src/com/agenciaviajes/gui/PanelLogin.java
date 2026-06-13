@@ -1,8 +1,9 @@
 package com.agenciaviajes.gui;
 
 import com.agenciaviajes.modelo.AgenciaViajes;
-import java.awt.*;
+
 import javax.swing.*;
+import java.awt.*;
 
 /**
  * Pantalla de inicio de sesion. Valida el login y la contrasena
