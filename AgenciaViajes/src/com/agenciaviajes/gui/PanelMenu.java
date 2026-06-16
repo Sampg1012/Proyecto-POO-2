@@ -1,14 +1,12 @@
 package com.agenciaviajes.gui;
 
 import com.agenciaviajes.modelo.AgenciaViajes;
-
 import javax.swing.*;
 import java.awt.*;
 
 /**
- * Menu principal mostrado luego de iniciar sesion. Permite navegar a las
- * distintas funcionalidades: consulta de vuelos, reservas, mis reservas
- * y administracion de la cuenta.
+ * Menu principal rediseñado con identidad visual ViajaYa.
+ * Botones grandes con iconos para cada funcionalidad.
  */
 public class PanelMenu extends JPanel {
 
@@ -17,55 +15,65 @@ public class PanelMenu extends JPanel {
 
     public PanelMenu(VentanaPrincipal ventana, AgenciaViajes agencia) {
         this.agencia = agencia;
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(30, 50, 30, 50));
+        setLayout(new BorderLayout());
+        setBackground(Estilos.FONDO_CLARO);
+
+        // Header
+        add(Estilos.crearHeader("Menu Principal"), BorderLayout.NORTH);
+
+        // Panel central
+        JPanel centro = new JPanel(new BorderLayout(0, 20));
+        centro.setBackground(Estilos.FONDO_CLARO);
+        centro.setBorder(BorderFactory.createEmptyBorder(25, 40, 10, 40));
 
         lblBienvenida = new JLabel("", SwingConstants.CENTER);
-        lblBienvenida.setFont(new Font("SansSerif", Font.BOLD, 22));
-        add(lblBienvenida, BorderLayout.NORTH);
+        lblBienvenida.setFont(new Font("SansSerif", Font.BOLD, 20));
+        lblBienvenida.setForeground(Estilos.TEXTO_OSCURO);
+        centro.add(lblBienvenida, BorderLayout.NORTH);
 
-        JPanel panelOpciones = new JPanel(new GridLayout(2, 2, 20, 20));
-        panelOpciones.setBorder(BorderFactory.createEmptyBorder(20, 60, 20, 60));
+        // Grid de botones de menu
+        JPanel gridMenu = new JPanel(new GridLayout(2, 2, 18, 18));
+        gridMenu.setBackground(Estilos.FONDO_CLARO);
 
-        JButton btnConsultarVuelos = new JButton("Consultar Vuelos");
-        JButton btnCrearReserva = new JButton("Crear Reserva");
-        JButton btnMisReservas = new JButton("Mis Reservas");
-        JButton btnCuenta = new JButton("Mi Cuenta");
+        JButton btnVuelos    = Estilos.botonMenu("Consultar Vuelos", "🔍");
+        JButton btnReserva   = Estilos.botonMenu("Crear Reserva", "✈");
+        JButton btnMisRes    = Estilos.botonMenu("Mis Reservas", "📋");
+        JButton btnCuenta    = Estilos.botonMenu("Mi Cuenta", "👤");
 
-        for (JButton b : new JButton[]{btnConsultarVuelos, btnCrearReserva, btnMisReservas, btnCuenta}) {
-            b.setFont(new Font("SansSerif", Font.PLAIN, 16));
-        }
+        gridMenu.add(btnVuelos);
+        gridMenu.add(btnReserva);
+        gridMenu.add(btnMisRes);
+        gridMenu.add(btnCuenta);
 
-        panelOpciones.add(btnConsultarVuelos);
-        panelOpciones.add(btnCrearReserva);
-        panelOpciones.add(btnMisReservas);
-        panelOpciones.add(btnCuenta);
+        centro.add(gridMenu, BorderLayout.CENTER);
+        add(centro, BorderLayout.CENTER);
 
-        add(panelOpciones, BorderLayout.CENTER);
+        // Panel inferior con cerrar sesion
+        JPanel sur = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 15));
+        sur.setBackground(Estilos.FONDO_CLARO);
+        sur.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Estilos.BORDE_SUAVE));
 
-        JButton btnCerrarSesion = new JButton("Cerrar Sesion");
-        JPanel panelInferior = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        panelInferior.add(btnCerrarSesion);
-        add(panelInferior, BorderLayout.SOUTH);
+        JButton btnCerrar = Estilos.botonVolver("Cerrar Sesion");
+        sur.add(btnCerrar);
+        add(sur, BorderLayout.SOUTH);
 
-        btnConsultarVuelos.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_CONSULTA_VUELOS));
-        btnCrearReserva.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_RESERVA));
-        btnMisReservas.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_MIS_RESERVAS));
+        // Eventos
+        btnVuelos.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_CONSULTA_VUELOS));
+        btnReserva.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_RESERVA));
+        btnMisRes.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_MIS_RESERVAS));
         btnCuenta.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_CUENTA));
 
-        btnCerrarSesion.addActionListener(e -> {
+        btnCerrar.addActionListener(e -> {
             ventana.guardarDatos();
             agencia.cerrarSesion();
             ventana.mostrarPanel(VentanaPrincipal.PANEL_BIENVENIDA);
         });
     }
 
-    /**
-     * Actualiza el mensaje de bienvenida con el nombre del usuario actual.
-     */
     public void actualizar() {
         if (agencia.getUsuarioActual() != null) {
-            lblBienvenida.setText("Bienvenido, " + agencia.getUsuarioActual().getNombres());
+            lblBienvenida.setText("Bienvenido, " + agencia.getUsuarioActual().getNombres() + " 👋");
         }
     }
 }
+

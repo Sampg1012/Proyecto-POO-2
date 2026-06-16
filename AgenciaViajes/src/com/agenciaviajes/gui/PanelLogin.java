@@ -1,12 +1,11 @@
 package com.agenciaviajes.gui;
 
 import com.agenciaviajes.modelo.AgenciaViajes;
-import java.awt.*;
 import javax.swing.*;
+import java.awt.*;
 
 /**
- * Pantalla de inicio de sesion. Valida el login y la contrasena
- * del usuario contra los datos registrados en el sistema.
+ * Pantalla de inicio de sesion rediseñada con identidad visual ViajaYa.
  */
 public class PanelLogin extends JPanel {
 
@@ -14,66 +13,85 @@ public class PanelLogin extends JPanel {
     private final JPasswordField txtContrasena;
 
     public PanelLogin(VentanaPrincipal ventana, AgenciaViajes agencia) {
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout());
+        setBackground(Estilos.FONDO_CLARO);
+
+        // Header
+        add(Estilos.crearHeader("Iniciar Sesion"), BorderLayout.NORTH);
+
+        // Tarjeta central
+        JPanel tarjeta = new JPanel(new GridBagLayout());
+        tarjeta.setBackground(Color.WHITE);
+        tarjeta.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Estilos.BORDE_SUAVE, 1, true),
+                BorderFactory.createEmptyBorder(40, 50, 40, 50)
+        ));
+        tarjeta.setMaximumSize(new Dimension(420, 350));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        JLabel titulo = new JLabel("Iniciar Sesion");
-        titulo.setFont(new Font("SansSerif", Font.BOLD, 20));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
         gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(titulo, gbc);
+
+        JLabel icono = new JLabel("✈", SwingConstants.CENTER);
+        icono.setFont(new Font("SansSerif", Font.PLAIN, 40));
+        icono.setForeground(Estilos.AZUL_CIELO);
+        gbc.gridx = 0; gbc.gridy = 0;
+        tarjeta.add(icono, gbc);
+
+        JLabel lblBienvenida = new JLabel("Bienvenido de nuevo", SwingConstants.CENTER);
+        lblBienvenida.setFont(new Font("SansSerif", Font.BOLD, 18));
+        lblBienvenida.setForeground(Estilos.TEXTO_OSCURO);
+        gbc.gridy = 1;
+        tarjeta.add(lblBienvenida, gbc);
 
         gbc.gridwidth = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        add(new JLabel("Usuario (login):"), gbc);
-
-        txtLogin = new JTextField(20);
+        gbc.gridy = 2; gbc.gridx = 0;
+        tarjeta.add(Estilos.labelCampo("Usuario:"), gbc);
+        txtLogin = new JTextField(18);
+        Estilos.estilizarCampo(txtLogin);
         gbc.gridx = 1;
-        add(txtLogin, gbc);
+        tarjeta.add(txtLogin, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        add(new JLabel("Contrasena:"), gbc);
-
-        txtContrasena = new JPasswordField(20);
+        gbc.gridy = 3; gbc.gridx = 0;
+        tarjeta.add(Estilos.labelCampo("Contrasena:"), gbc);
+        txtContrasena = new JPasswordField(18);
+        Estilos.estilizarCampo(txtContrasena);
         gbc.gridx = 1;
-        add(txtContrasena, gbc);
+        tarjeta.add(txtContrasena, gbc);
 
-        JButton btnIngresar = new JButton("Ingresar");
-        JButton btnVolver = new JButton("Volver");
-        JButton btnIrRegistro = new JButton("No tengo cuenta - Registrarme");
-
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        JButton btnIngresar = Estilos.botonPrincipal("Ingresar");
+        JButton btnVolver = Estilos.botonVolver("Volver");
+        gbc.gridwidth = 2; gbc.gridx = 0; gbc.gridy = 4;
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        panelBotones.setBackground(Color.WHITE);
         panelBotones.add(btnIngresar);
         panelBotones.add(btnVolver);
+        tarjeta.add(panelBotones, gbc);
 
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(panelBotones, gbc);
+        JButton btnRegistro = Estilos.botonVolver("No tengo cuenta — Registrarme");
+        gbc.gridy = 5;
+        JPanel panelRegistro = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelRegistro.setBackground(Color.WHITE);
+        panelRegistro.add(btnRegistro);
+        tarjeta.add(panelRegistro, gbc);
 
-        gbc.gridy = 4;
-        add(btnIrRegistro, gbc);
+        // Contenedor centrado
+        JPanel contenedor = new JPanel(new GridBagLayout());
+        contenedor.setBackground(Estilos.FONDO_CLARO);
+        contenedor.add(tarjeta);
+        add(contenedor, BorderLayout.CENTER);
 
+        // Eventos
         btnIngresar.addActionListener(e -> {
             String login = txtLogin.getText().trim();
             String contrasena = new String(txtContrasena.getPassword());
-
             if (login.isEmpty() || contrasena.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                         "Debe ingresar el usuario y la contrasena.",
                         "Datos incompletos", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
             if (agencia.iniciarSesion(login, contrasena)) {
                 txtLogin.setText("");
                 txtContrasena.setText("");
@@ -91,7 +109,7 @@ public class PanelLogin extends JPanel {
             ventana.mostrarPanel(VentanaPrincipal.PANEL_BIENVENIDA);
         });
 
-        btnIrRegistro.addActionListener(e -> {
+        btnRegistro.addActionListener(e -> {
             txtLogin.setText("");
             txtContrasena.setText("");
             ventana.mostrarPanel(VentanaPrincipal.PANEL_REGISTRO);
