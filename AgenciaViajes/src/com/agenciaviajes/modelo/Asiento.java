@@ -71,6 +71,16 @@ public abstract class Asiento implements Serializable {
      */
     public abstract String getServicios();
 
+    public abstract double getFactorPrecio();
+
+    public double calcularRecargo(double tarifaFinalVuelo) {
+        return tarifaFinalVuelo * (getFactorPrecio() - 1.0);
+    }
+
+    public double calcularPrecio(double tarifaFinalVuelo) {
+        return tarifaFinalVuelo * getFactorPrecio();
+    }
+    
     @Override
     public String toString() {
         return "Asiento " + numero + " [" + categoria + "] - "

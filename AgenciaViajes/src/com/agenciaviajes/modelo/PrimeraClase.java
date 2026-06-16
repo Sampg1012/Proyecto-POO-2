@@ -27,4 +27,9 @@ public class PrimeraClase extends Asiento {
     public String getServicios() {
         return menuExclusivo() + " + Acceso a sala VIP + 3 piezas de equipaje";
     }
+
+    @Override
+    public double getFactorPrecio() {
+    return 3.0;
+}
 }

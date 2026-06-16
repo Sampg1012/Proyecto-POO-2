@@ -2,6 +2,7 @@ package com.agenciaviajes.gui;
 
 import com.agenciaviajes.modelo.AgenciaViajes;
 import com.agenciaviajes.modelo.Vuelo;
+import com.agenciaviajes.modelo.CatalogoDatos;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -19,8 +20,8 @@ public class PanelConsultaVuelos extends JPanel {
 
     private final AgenciaViajes agencia;
 
-    private final JTextField txtOrigen;
-    private final JTextField txtDestino;
+    private final JComboBox<String> cmbOrigen;
+    private final JComboBox<String> cmbDestino;
     private final JTextField txtFecha;
     private final JTextField txtAerolinea;
     private final JCheckBox chkSoloDirectos;
@@ -47,15 +48,21 @@ public class PanelConsultaVuelos extends JPanel {
 
         gbc.gridx = 0; gbc.gridy = 0;
         panelFiltros.add(new JLabel("Origen:"), gbc);
-        txtOrigen = new JTextField(10);
+        cmbOrigen = new JComboBox<>();
+        cmbOrigen.addItem("");
+        for (String c : CatalogoDatos.todasLasCiudades()) cmbOrigen.addItem(c);
+        cmbOrigen.setEditable(false);
         gbc.gridx = 1;
-        panelFiltros.add(txtOrigen, gbc);
+        panelFiltros.add(cmbOrigen, gbc);
 
         gbc.gridx = 2;
         panelFiltros.add(new JLabel("Destino:"), gbc);
-        txtDestino = new JTextField(10);
+        cmbDestino = new JComboBox<>();
+        cmbDestino.addItem("");
+        for (String c : CatalogoDatos.todasLasCiudades()) cmbDestino.addItem(c);
+        cmbDestino.setEditable(false);
         gbc.gridx = 3;
-        panelFiltros.add(txtDestino, gbc);
+        panelFiltros.add(cmbDestino, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
         panelFiltros.add(new JLabel("Fecha (AAAA-MM-DD, opcional):"), gbc);
@@ -124,15 +131,15 @@ public class PanelConsultaVuelos extends JPanel {
     }
 
     private void buscarVuelos() {
-        String origen = txtOrigen.getText().trim();
-        String destino = txtDestino.getText().trim();
+        String origen = ((String) cmbOrigen.getSelectedItem()).trim();
+        String destino = ((String) cmbDestino.getSelectedItem()).trim();
         String fechaTexto = txtFecha.getText().trim();
         String aerolinea = txtAerolinea.getText().trim();
 
         if (origen.isEmpty() || destino.isEmpty()) {
             JOptionPane.showMessageDialog(this,
-                    "Debe indicar ciudad de origen y destino.",
-                    "Datos incompletos", JOptionPane.WARNING_MESSAGE);
+                "Debe seleccionar ciudad de origen y destino de la lista.",
+                "Datos incompletos", JOptionPane.WARNING_MESSAGE);
             return;
         }
 

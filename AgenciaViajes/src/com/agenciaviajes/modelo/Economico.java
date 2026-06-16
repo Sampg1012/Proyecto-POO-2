@@ -27,4 +27,9 @@ public class Economico extends Asiento {
     public String getServicios() {
         return equipamientoDeMano();
     }
+
+    @Override
+    public double getFactorPrecio() {
+        return 1.0;
+}
 }
