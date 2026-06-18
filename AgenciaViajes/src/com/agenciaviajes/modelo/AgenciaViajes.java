@@ -269,36 +269,45 @@ public class AgenciaViajes implements Serializable {
         VueloNacional v1 = new VueloNacional("V001", "Bogota", "Medellin",
                 LocalDate.now().plusDays(2), LocalTime.of(8, 0), LocalTime.of(9, 5),
                 180000, avianca, true, 0.08);
-        crearAsientosBasicos(v1);
+        GeneradorVuelos.crearAsientos(v1);
         agregarVuelo(v1);
 
         VueloNacional v2 = new VueloNacional("V002", "Bogota", "Cartagena",
                 LocalDate.now().plusDays(3), LocalTime.of(14, 30), LocalTime.of(16, 0),
                 220000, latam, true, 0.08);
-        crearAsientosBasicos(v2);
+        GeneradorVuelos.crearAsientos(v2);
         agregarVuelo(v2);
 
         VueloInternacional v3 = new VueloInternacional("V003", "Bogota", "Madrid",
                 LocalDate.now().plusDays(5), LocalTime.of(22, 0), LocalTime.of(14, 30),
                 2500000, avianca, true, 0.15);
-        crearAsientosBasicos(v3);
+        GeneradorVuelos.crearAsientos(v3);
         agregarVuelo(v3);
 
         VueloInternacional v4 = new VueloInternacional("V004", "Cartagena", "Miami",
                 LocalDate.now().plusDays(4), LocalTime.of(10, 15), LocalTime.of(13, 45),
                 1800000, latam, false, 0.15);
         v4.getCiudadesEscala().add("Panama");
-        crearAsientosBasicos(v4);
+        GeneradorVuelos.crearAsientos(v4);
         agregarVuelo(v4);
     }
 
     private void crearAsientosBasicos(Vuelo vuelo) {
-        for (int i = 1; i <= 4; i++) {
-            vuelo.agregarAsiento(new Economico("E" + i));
+        GeneradorVuelos.crearAsientos(vuelo);
+    }
+
+    /**
+     * Repara vuelos cargados desde persistencia que no tengan asientos.
+     */
+    public void repararVuelosSinAsientos() {
+        for (Vuelo vuelo : vuelos) {
+            if (vuelo.getAsientos() == null || vuelo.getAsientos().isEmpty()) {
+                GeneradorVuelos.crearAsientos(vuelo);
+            }
+            Aerolinea aerolinea = vuelo.getAerolinea();
+            if (aerolinea != null && !aerolinea.getVuelos().contains(vuelo)) {
+                aerolinea.agregarVuelo(vuelo);
+            }
         }
-        for (int i = 1; i <= 2; i++) {
-            vuelo.agregarAsiento(new Ejecutivo("J" + i));
-        }
-        vuelo.agregarAsiento(new PrimeraClase("P1"));
     }
 }

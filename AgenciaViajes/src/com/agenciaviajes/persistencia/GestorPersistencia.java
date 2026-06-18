@@ -1,7 +1,6 @@
 package com.agenciaviajes.persistencia;
 
 import com.agenciaviajes.modelo.AgenciaViajes;
-
 import java.io.*;
 
 /**
@@ -44,7 +43,9 @@ public class GestorPersistencia {
         }
         try (ObjectInputStream ois = new ObjectInputStream(
                 new FileInputStream(ARCHIVO_DATOS))) {
-            return (AgenciaViajes) ois.readObject();
+            AgenciaViajes cargada = (AgenciaViajes) ois.readObject();
+            cargada.repararVuelosSinAsientos();
+            return cargada;
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error al cargar los datos: " + e.getMessage());
             AgenciaViajes nueva = new AgenciaViajes(nombreAgencia);

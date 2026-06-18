@@ -24,7 +24,7 @@ public class App {
             // Si falla, se usa el look and feel por defecto
         }
 
-        AgenciaViajes agencia = GestorPersistencia.cargar("Agencia de Viajes ViajaYa");
+        AgenciaViajes agencia = GestorPersistencia.cargar("Agencia de Viajes ViajaPYa");
 
         SwingUtilities.invokeLater(() -> {
             VentanaPrincipal ventana = new VentanaPrincipal(agencia);

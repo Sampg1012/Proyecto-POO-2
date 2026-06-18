@@ -57,7 +57,7 @@ public class GeneradorVuelos {
                 vuelo.getCiudadesEscala().add(CatalogoDatos.obtenerEscalaAleatoria());
             }
 
-            crearAsientosBasicos(vuelo);
+            crearAsientos(vuelo);
             vuelos.add(vuelo);
         }
         return vuelos;
@@ -67,14 +67,41 @@ public class GeneradorVuelos {
         return texto == null ? "" : texto.trim();
     }
 
-    private static void crearAsientosBasicos(Vuelo vuelo) {
-        for (int i = 1; i <= 4; i++) {
-            vuelo.agregarAsiento(new Economico("E" + i));
+    public static void crearAsientos(Vuelo vuelo) {
+        if (vuelo == null) {
+            return;
         }
-        for (int i = 1; i <= 2; i++) {
-            vuelo.agregarAsiento(new Ejecutivo("J" + i));
+        boolean internacional = vuelo instanceof VueloInternacional;
+        String destinoNormalizado = CatalogoDatos.normalizar(vuelo.getDestino());
+        CatalogoDatos.CategoriaInternacional categoriaInternacional = CatalogoDatos.CATEGORIA_DESTINO_INTERNACIONAL
+                .getOrDefault(destinoNormalizado, CatalogoDatos.CategoriaInternacional.REGIONAL);
+
+        if (!internacional || categoriaInternacional == CatalogoDatos.CategoriaInternacional.REGIONAL) {
+            int filasEjecutiva = random.nextInt(2) + 3; // 3-4 filas ejecutiva
+            int filasEconomica = random.nextInt(6) + 22; // 22-27 filas econ
+            crearSeccionAsientos(vuelo, 1, filasEjecutiva, new char[]{'A', 'C', 'D', 'F'}, "Ejecutiva");
+            crearSeccionAsientos(vuelo, filasEjecutiva + 1, filasEconomica, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Economica");
+        } else {
+            int filasPrimera = random.nextInt(2) + 2; // 2-3 filas primera clase
+            int filasEjecutiva = random.nextInt(3) + 6; // 6-8 filas ejecutiva
+            int filasEconomica = random.nextInt(8) + 28; // 28-35 filas econ
+            crearSeccionAsientos(vuelo, 1, filasPrimera, new char[]{'A', 'D'}, "Primera Clase");
+            crearSeccionAsientos(vuelo, filasPrimera + 1, filasEjecutiva, new char[]{'A', 'C', 'D', 'F'}, "Ejecutiva");
+            crearSeccionAsientos(vuelo, filasPrimera + filasEjecutiva + 1, filasEconomica, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Economica");
         }
-        vuelo.agregarAsiento(new PrimeraClase("P1"));
+    }
+
+    private static void crearSeccionAsientos(Vuelo vuelo, int filaInicio, int filas, char[] letras, String categoria) {
+        for (int fila = filaInicio; fila < filaInicio + filas; fila++) {
+            for (char letra : letras) {
+                String numero = fila + String.valueOf(letra);
+                switch (categoria) {
+                    case "Primera Clase" -> vuelo.agregarAsiento(new PrimeraClase(numero));
+                    case "Ejecutiva" -> vuelo.agregarAsiento(new Ejecutivo(numero));
+                    default -> vuelo.agregarAsiento(new Economico(numero));
+                }
+            }
+        }
     }
 
     private static Aerolinea obtenerAerolineaAleatoria(String aerolineaFiltro, boolean internacional) {
