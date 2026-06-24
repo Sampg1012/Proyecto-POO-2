@@ -30,7 +30,8 @@ public class PanelReserva extends JPanel {
     private final JTextField txtPasEdad;
     private final JTextField txtPasContacto;
     private final JComboBox<String> cmbTipoPasajero;
-    private final JTextField txtCampoExtra; // acompanante (Nino) o asistencia (AdultoMayor: si/no)
+    private final JTextField txtCampoExtra; // acompanante (Nino)
+    private final JComboBox<String> cmbCampoExtra; // asistencia (Adulto Mayor)
     private final JLabel lblCampoExtra;
     private final DefaultTableModel modeloPasajeros;
     private final JTable tablaPasajeros;
@@ -139,8 +140,12 @@ public class PanelReserva extends JPanel {
         panelFormPasajero.add(lblCampoExtra, gbc);
         txtCampoExtra = new JTextField(15);
         Estilos.estilizarCampo(txtCampoExtra);
+        cmbCampoExtra = new JComboBox<>(new String[]{"Si", "No"});
+        Estilos.estilizarCombo(cmbCampoExtra);
+        cmbCampoExtra.setVisible(false);
         gbc.gridx = 1;
         panelFormPasajero.add(txtCampoExtra, gbc);
+        panelFormPasajero.add(cmbCampoExtra, gbc);
 
         JButton btnAgregarPasajero = Estilos.botonPrincipal("Agregar pasajero");
         JButton btnQuitarPasajero = Estilos.botonVolver("Quitar pasajero seleccionado");
@@ -295,18 +300,26 @@ public class PanelReserva extends JPanel {
         txtPasEdad.setText("");
         txtPasContacto.setText("");
         txtCampoExtra.setText("");
+        cmbCampoExtra.setSelectedIndex(0);
     }
 
     private void actualizarCampoExtra() {
         String tipo = (String) cmbTipoPasajero.getSelectedItem();
         if ("Nino".equals(tipo)) {
             lblCampoExtra.setText("Acompanante (Nino):");
+            txtCampoExtra.setVisible(true);
+            cmbCampoExtra.setVisible(false);
             txtCampoExtra.setEnabled(true);
+            txtCampoExtra.setText("");
         } else if ("Adulto Mayor".equals(tipo)) {
-            lblCampoExtra.setText("Requiere asistencia? (si/no):");
-            txtCampoExtra.setEnabled(true);
+            lblCampoExtra.setText("Requiere asistencia?");
+            txtCampoExtra.setVisible(false);
+            cmbCampoExtra.setVisible(true);
+            cmbCampoExtra.setSelectedIndex(0);
         } else {
             lblCampoExtra.setText("No aplica:");
+            txtCampoExtra.setVisible(false);
+            cmbCampoExtra.setVisible(false);
             txtCampoExtra.setEnabled(false);
             txtCampoExtra.setText("");
         }
@@ -369,7 +382,12 @@ public class PanelReserva extends JPanel {
         String edadTexto = txtPasEdad.getText().trim();
         String contacto = txtPasContacto.getText().trim();
         String tipo = (String) cmbTipoPasajero.getSelectedItem();
-        String extra = txtCampoExtra.getText().trim();
+        String extra = "";
+        if ("Adulto Mayor".equals(tipo)) {
+            extra = (String) cmbCampoExtra.getSelectedItem();
+        } else {
+            extra = txtCampoExtra.getText().trim();
+        }
 
         if (id.isEmpty() || nombre.isEmpty() || edadTexto.isEmpty() || contacto.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Complete todos los campos obligatorios.",
@@ -399,7 +417,7 @@ public class PanelReserva extends JPanel {
                 detalle = "Acompanante: " + extra;
                 break;
             case "Adulto Mayor":
-                boolean requiereAsistencia = extra.equalsIgnoreCase("si") || extra.equalsIgnoreCase("s");
+                boolean requiereAsistencia = "Si".equalsIgnoreCase(extra);
                 pasajero = new AdultoMayor(id, nombre, edad, contacto, requiereAsistencia);
                 detalle = "Asistencia: " + (requiereAsistencia ? "Si" : "No");
                 break;

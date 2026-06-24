@@ -3,6 +3,7 @@ package com.agenciaviajes.modelo;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -108,6 +109,7 @@ public class GeneradorVuelos {
             crearSeccionAsientos(vuelo, filasPrimera + 1, filasEjecutiva, new char[]{'A', 'C', 'D', 'F'}, "Ejecutiva");
             crearSeccionAsientos(vuelo, filasPrimera + filasEjecutiva + 1, filasEconomica, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Economica");
         }
+        marcarAsientosOcupados(vuelo);
     }
 
     private static void crearSeccionAsientos(Vuelo vuelo, int filaInicio, int filas, char[] letras, String categoria) {
@@ -120,6 +122,33 @@ public class GeneradorVuelos {
                     default -> vuelo.agregarAsiento(new Economico(numero));
                 }
             }
+        }
+    }
+
+    private static void marcarAsientosOcupados(Vuelo vuelo) {
+        if (vuelo == null) {
+            return;
+        }
+        ocuparAsientosAleatorios(vuelo, "Primera Clase");
+        ocuparAsientosAleatorios(vuelo, "Ejecutiva");
+        ocuparAsientosAleatorios(vuelo, "Economica");
+    }
+
+    private static void ocuparAsientosAleatorios(Vuelo vuelo, String categoria) {
+        List<Asiento> categoriaAsientos = new ArrayList<>();
+        for (Asiento asiento : vuelo.getAsientos()) {
+            if (asiento.getCategoria().equalsIgnoreCase(categoria)) {
+                categoriaAsientos.add(asiento);
+            }
+        }
+        if (categoriaAsientos.isEmpty()) {
+            return;
+        }
+        int cantidadOcupados = Math.min(5, Math.max(3, 3 + random.nextInt(3)));
+        cantidadOcupados = Math.min(cantidadOcupados, categoriaAsientos.size());
+        Collections.shuffle(categoriaAsientos);
+        for (int i = 0; i < cantidadOcupados; i++) {
+            categoriaAsientos.get(i).reservar();
         }
     }
 

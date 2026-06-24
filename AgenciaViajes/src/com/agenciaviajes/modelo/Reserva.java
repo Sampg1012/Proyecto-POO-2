@@ -91,11 +91,16 @@ public class Reserva implements Serializable {
      * @return true si el pasajero fue agregado, false si los datos no son validos.
      */
     public boolean agregarPasajero(Pasajero pasajero) {
-        if (pasajero != null && pasajero.validarDatos()) {
-            pasajeros.add(pasajero);
-            return true;
+        if (pasajero == null || !pasajero.validarDatos()) {
+            return false;
         }
-        return false;
+        for (Pasajero existente : pasajeros) {
+            if (existente.getId() != null && existente.getId().equalsIgnoreCase(pasajero.getId())) {
+                return false;
+            }
+        }
+        pasajeros.add(pasajero);
+        return true;
     }
 
     public void eliminarPasajero(Pasajero pasajero) {
