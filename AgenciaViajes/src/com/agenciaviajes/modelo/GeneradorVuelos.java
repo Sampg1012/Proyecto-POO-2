@@ -44,7 +44,13 @@ public class GeneradorVuelos {
 
             double tarifa = CatalogoDatos.generarTarifaReferencia(origenFinal, destinoFinal);
             Aerolinea aero = obtenerAerolineaAleatoria(aerolinea, internacional);
-            LocalDate fechaVuelo = (fecha != null) ? fecha : LocalDate.now().plusDays(random.nextInt(30));
+            LocalDate fechaVuelo;
+            if (fecha != null) {
+                // Si el usuario solicita una fecha pasada, usar la fecha actual en su lugar
+                fechaVuelo = fecha.isBefore(LocalDate.now()) ? LocalDate.now() : fecha;
+            } else {
+                fechaVuelo = LocalDate.now().plusDays(random.nextInt(30));
+            }
             boolean esDirecto = internacional ? random.nextBoolean() : true;
 
             Vuelo vuelo;
@@ -145,7 +151,9 @@ public class GeneradorVuelos {
             return;
         }
         int cantidadOcupados = Math.min(5, Math.max(3, 3 + random.nextInt(3)));
-        cantidadOcupados = Math.min(cantidadOcupados, categoriaAsientos.size());
+        // No ocupar todos los asientos: dejar al menos uno disponible cuando sea posible
+        int maxOcupables = Math.max(0, categoriaAsientos.size() - 1);
+        cantidadOcupados = Math.min(cantidadOcupados, Math.max(0, maxOcupables));
         Collections.shuffle(categoriaAsientos);
         for (int i = 0; i < cantidadOcupados; i++) {
             categoriaAsientos.get(i).reservar();

@@ -121,6 +121,15 @@ public class PanelRegistro extends JPanel {
                 return;
             }
 
+            // Validacion basica de formato de correo
+            String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+            if (!email.matches(emailRegex)) {
+                JOptionPane.showMessageDialog(this,
+                        "Ingrese un correo electronico con formato valido (ej: usuario@dominio.com).",
+                        "Correo invalido", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
             boolean exito = agencia.registrarse(nombres, email, login, contrasena);
             if (exito) {
                 JOptionPane.showMessageDialog(this,
