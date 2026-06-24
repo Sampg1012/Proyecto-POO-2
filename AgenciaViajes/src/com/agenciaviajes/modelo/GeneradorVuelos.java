@@ -5,10 +5,12 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GeneradorVuelos {
 
     private static final Random random = new Random();
+    private static final AtomicInteger SECUENCIA_IDS = new AtomicInteger(1000);
 
     public static List<Vuelo> generarVuelos(int cantidad) {
         return generarVuelos(null, null, null, null, cantidad);
@@ -45,13 +47,14 @@ public class GeneradorVuelos {
             boolean esDirecto = internacional ? random.nextBoolean() : true;
 
             Vuelo vuelo;
+            String idVuelo = generarIdVuelo(internacional);
             if (internacional) {
                 vuelo = new VueloInternacional(
-                        "INT-" + (1000 + i), origenFinal, destinoFinal,
+                        idVuelo, origenFinal, destinoFinal,
                         fechaVuelo, salida, llegada, tarifa, aero, esDirecto);
             } else {
                 vuelo = new VueloNacional(
-                        "NAL-" + (1000 + i), origenFinal, destinoFinal,
+                        idVuelo, origenFinal, destinoFinal,
                         fechaVuelo, salida, llegada, tarifa, aero, esDirecto);
             }
 
@@ -73,6 +76,10 @@ public class GeneradorVuelos {
         return salida.plusHours(1 + random.nextInt(10));
     }
 
+    private static String generarIdVuelo(boolean internacional) {
+        return internacional ? "INT-" + SECUENCIA_IDS.incrementAndGet() : "NAL-" + SECUENCIA_IDS.incrementAndGet();
+    }
+
     private static String normalizarTexto(String texto) {
         return texto == null ? "" : texto.trim();
     }
@@ -87,10 +94,12 @@ public class GeneradorVuelos {
                 .getOrDefault(destinoNormalizado, CatalogoDatos.CategoriaInternacional.REGIONAL);
 
         if (!internacional || categoriaInternacional == CatalogoDatos.CategoriaInternacional.REGIONAL) {
+            int filasPrimera = random.nextInt(2) + 1; // 1-2 filas primera clase
             int filasEjecutiva = random.nextInt(2) + 3; // 3-4 filas ejecutiva
             int filasEconomica = random.nextInt(6) + 22; // 22-27 filas econ
-            crearSeccionAsientos(vuelo, 1, filasEjecutiva, new char[]{'A', 'C', 'D', 'F'}, "Ejecutiva");
-            crearSeccionAsientos(vuelo, filasEjecutiva + 1, filasEconomica, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Economica");
+            crearSeccionAsientos(vuelo, 1, filasPrimera, new char[]{'A', 'D'}, "Primera Clase");
+            crearSeccionAsientos(vuelo, filasPrimera + 1, filasEjecutiva, new char[]{'A', 'C', 'D', 'F'}, "Ejecutiva");
+            crearSeccionAsientos(vuelo, filasPrimera + filasEjecutiva + 1, filasEconomica, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Economica");
         } else {
             int filasPrimera = random.nextInt(2) + 2; // 2-3 filas primera clase
             int filasEjecutiva = random.nextInt(3) + 6; // 6-8 filas ejecutiva

@@ -508,6 +508,13 @@ public class PanelReserva extends JPanel {
             return;
         }
 
+        if (reservaActual.getAsientosAsignados().containsKey(pasajero.getId())) {
+            JOptionPane.showMessageDialog(this,
+                    "Este pasajero ya tiene un asiento asignado.",
+                    "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         boolean asignado = reservaActual.asignarAsientoAPasajero(pasajero, asiento);
         if (!asignado) {
             JOptionPane.showMessageDialog(this,

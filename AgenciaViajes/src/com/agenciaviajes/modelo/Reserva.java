@@ -100,7 +100,12 @@ public class Reserva implements Serializable {
 
     public void eliminarPasajero(Pasajero pasajero) {
         pasajeros.remove(pasajero);
-        asientosAsignados.remove(pasajero.getId());
+        if (pasajero != null) {
+            Asiento asientoAsignado = asientosAsignados.remove(pasajero.getId());
+            if (asientoAsignado != null) {
+                asientoAsignado.liberar();
+            }
+        }
     }
 
     /**
@@ -113,6 +118,9 @@ public class Reserva implements Serializable {
         }
         if (!pasajeros.contains(pasajero)) {
             return false;
+        }
+        if (asientosAsignados.containsKey(pasajero.getId())) {
+            return false; // Un pasajero solo puede tener un asiento
         }
         if (asientosAsignados.containsValue(asiento)) {
             return false; // El asiento ya esta asignado a otro pasajero
