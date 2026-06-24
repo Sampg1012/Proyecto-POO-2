@@ -18,11 +18,12 @@ public class GeneradorVuelos {
                                             LocalDate fecha, String aerolinea,
                                             int cantidad) {
         List<Vuelo> vuelos = new ArrayList<>();
+        int cantidadFinal = Math.max(8, Math.min(10, cantidad));
 
         String origenBase = normalizarTexto(origen);
         String destinoBase = normalizarTexto(destino);
 
-        for (int i = 0; i < cantidad; i++) {
+        for (int i = 0; i < cantidadFinal; i++) {
             String origenFinal = origenBase.isEmpty() ? obtenerOrigen() : origenBase;
             String destinoFinal = destinoBase.isEmpty()
                     ? (CatalogoDatos.esDestinoInternacional(CatalogoDatos.normalizar(origenFinal))
@@ -36,21 +37,22 @@ public class GeneradorVuelos {
 
             boolean internacional = CatalogoDatos.esDestinoInternacional(CatalogoDatos.normalizar(destinoFinal));
             LocalTime salida = LocalTime.of(random.nextInt(23), random.nextInt(60));
-            LocalTime llegada = salida.plusHours(1 + random.nextInt(10));
+            LocalTime llegada = calcularLlegada(salida, internacional);
 
             double tarifa = CatalogoDatos.generarTarifaReferencia(origenFinal, destinoFinal);
             Aerolinea aero = obtenerAerolineaAleatoria(aerolinea, internacional);
             LocalDate fechaVuelo = (fecha != null) ? fecha : LocalDate.now().plusDays(random.nextInt(30));
+            boolean esDirecto = internacional ? random.nextBoolean() : true;
 
             Vuelo vuelo;
             if (internacional) {
                 vuelo = new VueloInternacional(
                         "INT-" + (1000 + i), origenFinal, destinoFinal,
-                        fechaVuelo, salida, llegada, tarifa, aero, random.nextBoolean());
+                        fechaVuelo, salida, llegada, tarifa, aero, esDirecto);
             } else {
                 vuelo = new VueloNacional(
                         "NAL-" + (1000 + i), origenFinal, destinoFinal,
-                        fechaVuelo, salida, llegada, tarifa, aero, random.nextBoolean());
+                        fechaVuelo, salida, llegada, tarifa, aero, esDirecto);
             }
 
             if (!vuelo.isEsDirecto()) {
@@ -61,6 +63,14 @@ public class GeneradorVuelos {
             vuelos.add(vuelo);
         }
         return vuelos;
+    }
+
+    private static LocalTime calcularLlegada(LocalTime salida, boolean internacional) {
+        if (!internacional) {
+            int minutosDuracion = 60 + random.nextInt(61);
+            return salida.plusMinutes(minutosDuracion);
+        }
+        return salida.plusHours(1 + random.nextInt(10));
     }
 
     private static String normalizarTexto(String texto) {

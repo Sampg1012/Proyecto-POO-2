@@ -29,11 +29,12 @@ public final class CatalogoDatos {
 
         if (esCiudadNacional(origenNormalizado) && esCiudadNacional(destinoNormalizado)) {
             CategoriaNacional categoria = categoriaNacional(origenNormalizado, destinoNormalizado);
-            return switch (categoria) {
+            int tarifa = switch (categoria) {
                 case CORTA -> RANDOM.nextInt(TARIFA_CORTA[0], TARIFA_CORTA[1] + 1);
                 case MEDIA -> RANDOM.nextInt(TARIFA_MEDIA[0], TARIFA_MEDIA[1] + 1);
                 case LARGA -> RANDOM.nextInt(TARIFA_LARGA[0], TARIFA_LARGA[1] + 1);
             };
+            return Math.min(tarifa, 1_000_000);
         }
 
         CategoriaInternacional categoriaInternacional = CATEGORIA_DESTINO_INTERNACIONAL.getOrDefault(destinoNormalizado, CategoriaInternacional.REGIONAL);
