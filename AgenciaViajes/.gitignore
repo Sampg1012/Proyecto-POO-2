@@ -1,0 +1,10 @@
+# Ignorar todos los archivos compilados de Java
+*.class
+
+# Ignorar carpetas de compilación automáticas
+build/
+bin/
+dist/
+
+# Ignorar archivos de configuración local de NetBeans
+nbproject/private/
