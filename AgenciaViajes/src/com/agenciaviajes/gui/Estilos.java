@@ -1,6 +1,7 @@
 package com.agenciaviajes.gui;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.border.Border;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -292,6 +293,18 @@ public class Estilos {
         tabla.getTableHeader().setForeground(Color.WHITE);
         tabla.getTableHeader().setFont(FUENTE_BOLD);
         tabla.getTableHeader().setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        tabla.getTableHeader().setOpaque(true);
+
+        // Asegurar que cada columna use un renderer de header opaco
+        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer();
+        headerRenderer.setHorizontalAlignment(SwingConstants.LEFT);
+        headerRenderer.setBackground(AZUL_MARINO);
+        headerRenderer.setForeground(Color.WHITE);
+        headerRenderer.setFont(FUENTE_BOLD);
+        headerRenderer.setOpaque(true);
+        for (int i = 0; i < tabla.getColumnModel().getColumnCount(); i++) {
+            tabla.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
+        }
     }
 
     /**
