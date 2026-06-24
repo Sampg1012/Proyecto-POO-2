@@ -21,56 +21,74 @@ public class PanelCuenta extends JPanel {
     public PanelCuenta(VentanaPrincipal ventana, AgenciaViajes agencia) {
         this.agencia = agencia;
 
-        setLayout(new GridBagLayout());
+        setLayout(new BorderLayout(0, 0));
+        Estilos.aplicarFondo(this);
+
+        add(Estilos.crearHeader("Mi Cuenta"), BorderLayout.NORTH);
+
+        JPanel tarjeta = new JPanel(new GridBagLayout());
+        Estilos.aplicarFondoSecundario(tarjeta);
+        tarjeta.setMaximumSize(new Dimension(560, 360));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel titulo = new JLabel("Mi Cuenta");
-        titulo.setFont(new Font("SansSerif", Font.BOLD, 20));
+        JLabel titulo = Estilos.labelTitulo("Actualice su informacion personal");
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        add(titulo, gbc);
+        tarjeta.add(titulo, gbc);
 
         gbc.gridwidth = 1;
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0; gbc.gridy = 1;
-        add(new JLabel("Usuario (login):"), gbc);
+        tarjeta.add(Estilos.labelCampo("Usuario (login):"), gbc);
         lblLogin = new JLabel("");
+        lblLogin.setFont(Estilos.FUENTE_NORMAL);
+        lblLogin.setForeground(Estilos.TEXTO_OSCURO);
         gbc.gridx = 1;
-        add(lblLogin, gbc);
+        tarjeta.add(lblLogin, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        add(new JLabel("Nombres completos:"), gbc);
+        tarjeta.add(Estilos.labelCampo("Nombres completos:"), gbc);
         txtNombres = new JTextField(20);
+        Estilos.estilizarCampo(txtNombres);
         gbc.gridx = 1;
-        add(txtNombres, gbc);
+        tarjeta.add(txtNombres, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        add(new JLabel("Correo electronico:"), gbc);
+        tarjeta.add(Estilos.labelCampo("Correo electronico:"), gbc);
         txtEmail = new JTextField(20);
+        Estilos.estilizarCampo(txtEmail);
         gbc.gridx = 1;
-        add(txtEmail, gbc);
+        tarjeta.add(txtEmail, gbc);
 
         gbc.gridx = 0; gbc.gridy = 4;
-        add(new JLabel("Nueva contrasena (opcional):"), gbc);
+        tarjeta.add(Estilos.labelCampo("Nueva contrasena (opcional):"), gbc);
         txtNuevaContrasena = new JPasswordField(20);
+        Estilos.estilizarCampo(txtNuevaContrasena);
         gbc.gridx = 1;
-        add(txtNuevaContrasena, gbc);
+        tarjeta.add(txtNuevaContrasena, gbc);
 
-        JButton btnGuardar = new JButton("Guardar cambios");
-        JButton btnCancelarCuenta = new JButton("Cancelar mi registro");
-        JButton btnVolver = new JButton("Volver al menu");
+        JButton btnGuardar = Estilos.botonPrincipal("Guardar cambios");
+        JButton btnCancelarCuenta = Estilos.botonVolver("Cancelar mi registro");
+        JButton btnVolver = Estilos.botonVolver("Volver al menu");
 
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        panelBotones.setBackground(Estilos.FONDO_PANEL);
         panelBotones.add(btnGuardar);
         panelBotones.add(btnCancelarCuenta);
         panelBotones.add(btnVolver);
 
         gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.CENTER;
-        add(panelBotones, gbc);
+        tarjeta.add(panelBotones, gbc);
+
+        JPanel contenedor = new JPanel(new GridBagLayout());
+        contenedor.setBackground(Estilos.FONDO_CLARO);
+        contenedor.add(tarjeta);
+        add(contenedor, BorderLayout.CENTER);
 
         btnGuardar.addActionListener(e -> {
             String nombres = txtNombres.getText().trim();
