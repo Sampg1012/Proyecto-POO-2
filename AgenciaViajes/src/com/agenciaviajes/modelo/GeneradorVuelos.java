@@ -101,7 +101,8 @@ public class GeneradorVuelos {
                 .getOrDefault(destinoNormalizado, CatalogoDatos.CategoriaInternacional.REGIONAL);
 
         if (!internacional || categoriaInternacional == CatalogoDatos.CategoriaInternacional.REGIONAL) {
-            int filasPrimera = random.nextInt(2) + 1; // 1-2 filas primera clase
+            // Aumentar el minimo de filas de Primera Clase para que haya mas asientos
+            int filasPrimera = random.nextInt(2) + 2; // 2-3 filas primera clase
             int filasEjecutiva = random.nextInt(2) + 3; // 3-4 filas ejecutiva
             int filasEconomica = random.nextInt(6) + 22; // 22-27 filas econ
             crearSeccionAsientos(vuelo, 1, filasPrimera, new char[]{'A', 'D'}, "Primera Clase");
