@@ -22,12 +22,11 @@ public class PanelMisReservas extends JPanel {
     public PanelMisReservas(VentanaPrincipal ventana, AgenciaViajes agencia) {
         this.agencia = agencia;
 
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setLayout(new BorderLayout(12, 12));
+        setBackground(Estilos.FONDO_CLARO);
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        JLabel titulo = new JLabel("Mis Reservas", SwingConstants.CENTER);
-        titulo.setFont(new Font("SansSerif", Font.BOLD, 20));
-        add(titulo, BorderLayout.NORTH);
+        add(Estilos.crearHeader("Mis Reservas"), BorderLayout.NORTH);
 
         modeloReservas = new DefaultTableModel(
                 new String[]{"ID Reserva", "Fecha", "Estado", "Vuelos", "Pasajeros", "Total"}, 0) {
@@ -37,20 +36,29 @@ public class PanelMisReservas extends JPanel {
             }
         };
         tablaReservas = new JTable(modeloReservas);
+        Estilos.estilizarTabla(tablaReservas);
 
         areaDetalle = new JTextArea(10, 0);
-        areaDetalle.setEditable(false);
-        areaDetalle.setBorder(BorderFactory.createTitledBorder("Detalle de la reserva seleccionada"));
+        Estilos.estilizarAreaTexto(areaDetalle);
+        areaDetalle.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Estilos.AZUL_CIELO, 1, true),
+                "Detalle de la reserva seleccionada",
+                javax.swing.border.TitledBorder.LEFT,
+                javax.swing.border.TitledBorder.TOP,
+                Estilos.FUENTE_BOLD,
+                Estilos.AZUL_CIELO));
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 new JScrollPane(tablaReservas), new JScrollPane(areaDetalle));
-        splitPane.setResizeWeight(0.5);
+        splitPane.setResizeWeight(0.55);
+        splitPane.setBorder(BorderFactory.createLineBorder(Estilos.BORDE_SUAVE, 1, true));
         add(splitPane, BorderLayout.CENTER);
 
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
-        JButton btnVerDetalle = new JButton("Ver detalle");
-        JButton btnCancelar = new JButton("Cancelar reserva");
-        JButton btnVolver = new JButton("Volver al menu");
+        panelBotones.setBackground(Estilos.FONDO_CLARO);
+        JButton btnVerDetalle = Estilos.botonSecundario("Ver detalle");
+        JButton btnCancelar = Estilos.botonVolver("Cancelar reserva");
+        JButton btnVolver = Estilos.botonVolver("Volver al menu");
         panelBotones.add(btnVerDetalle);
         panelBotones.add(btnCancelar);
         panelBotones.add(btnVolver);

@@ -49,23 +49,29 @@ public class PanelReserva extends JPanel {
         this.ventana = ventana;
         this.agencia = agencia;
 
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setLayout(new BorderLayout(12, 12));
+        setBackground(Estilos.FONDO_CLARO);
+        setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-        JLabel titulo = new JLabel("Crear Reserva", SwingConstants.CENTER);
-        titulo.setFont(new Font("SansSerif", Font.BOLD, 20));
-        add(titulo, BorderLayout.NORTH);
+        add(Estilos.crearHeader("Crear Reserva"), BorderLayout.NORTH);
 
         JTabbedPane pestañas = new JTabbedPane();
+        Estilos.estilizarPestanas(pestañas);
 
         // ============== Pestaña 1: Itinerario ==============
         JPanel panelItinerario = new JPanel(new BorderLayout(10, 10));
+        Estilos.aplicarFondoSecundario(panelItinerario);
+        panelItinerario.setBackground(Estilos.FONDO_PANEL);
+
         JPanel panelAgregarVuelo = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelAgregarVuelo.add(new JLabel("ID del vuelo a agregar:"));
+        panelAgregarVuelo.setBackground(Estilos.FONDO_PANEL);
+        panelAgregarVuelo.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panelAgregarVuelo.add(Estilos.labelCampo("ID del vuelo a agregar:"));
         txtIdVuelo = new JTextField(8);
+        Estilos.estilizarCampo(txtIdVuelo);
         panelAgregarVuelo.add(txtIdVuelo);
-        JButton btnAgregarVuelo = new JButton("Agregar al itinerario");
-        JButton btnQuitarVuelo = new JButton("Quitar vuelo seleccionado");
+        JButton btnAgregarVuelo = Estilos.botonSecundario("Agregar al itinerario");
+        JButton btnQuitarVuelo = Estilos.botonVolver("Quitar vuelo seleccionado");
         panelAgregarVuelo.add(btnAgregarVuelo);
         panelAgregarVuelo.add(btnQuitarVuelo);
 
@@ -77,6 +83,7 @@ public class PanelReserva extends JPanel {
             }
         };
         tablaItinerario = new JTable(modeloItinerario);
+        Estilos.estilizarTabla(tablaItinerario);
 
         panelItinerario.add(panelAgregarVuelo, BorderLayout.NORTH);
         panelItinerario.add(new JScrollPane(tablaItinerario), BorderLayout.CENTER);
@@ -84,52 +91,62 @@ public class PanelReserva extends JPanel {
 
         // ============== Pestaña 2: Pasajeros ==============
         JPanel panelPasajeros = new JPanel(new BorderLayout(10, 10));
+        Estilos.aplicarFondoSecundario(panelPasajeros);
+        panelPasajeros.setBackground(Estilos.FONDO_PANEL);
         JPanel panelFormPasajero = new JPanel(new GridBagLayout());
+        panelFormPasajero.setBackground(Estilos.FONDO_PANEL);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0; gbc.gridy = 0;
-        panelFormPasajero.add(new JLabel("Tipo de pasajero:"), gbc);
+        panelFormPasajero.add(Estilos.labelCampo("Tipo de pasajero:"), gbc);
         cmbTipoPasajero = new JComboBox<>(new String[]{"Adulto", "Nino", "Adulto Mayor"});
+        Estilos.estilizarCombo(cmbTipoPasajero);
         gbc.gridx = 1;
         panelFormPasajero.add(cmbTipoPasajero, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        panelFormPasajero.add(new JLabel("ID / Identificacion:"), gbc);
+        panelFormPasajero.add(Estilos.labelCampo("ID / Identificacion:"), gbc);
         txtPasId = new JTextField(10);
+        Estilos.estilizarCampo(txtPasId);
         gbc.gridx = 1;
         panelFormPasajero.add(txtPasId, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        panelFormPasajero.add(new JLabel("Nombre:"), gbc);
+        panelFormPasajero.add(Estilos.labelCampo("Nombre:"), gbc);
         txtPasNombre = new JTextField(15);
+        Estilos.estilizarCampo(txtPasNombre);
         gbc.gridx = 1;
         panelFormPasajero.add(txtPasNombre, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3;
-        panelFormPasajero.add(new JLabel("Edad:"), gbc);
+        panelFormPasajero.add(Estilos.labelCampo("Edad:"), gbc);
         txtPasEdad = new JTextField(5);
+        Estilos.estilizarCampo(txtPasEdad);
         gbc.gridx = 1;
         panelFormPasajero.add(txtPasEdad, gbc);
 
         gbc.gridx = 0; gbc.gridy = 4;
-        panelFormPasajero.add(new JLabel("Contacto:"), gbc);
+        panelFormPasajero.add(Estilos.labelCampo("Contacto:"), gbc);
         txtPasContacto = new JTextField(15);
+        Estilos.estilizarCampo(txtPasContacto);
         gbc.gridx = 1;
         panelFormPasajero.add(txtPasContacto, gbc);
 
         gbc.gridx = 0; gbc.gridy = 5;
-        lblCampoExtra = new JLabel("Acompanante (Nino):");
+        lblCampoExtra = Estilos.labelCampo("Acompanante (Nino):");
         panelFormPasajero.add(lblCampoExtra, gbc);
         txtCampoExtra = new JTextField(15);
+        Estilos.estilizarCampo(txtCampoExtra);
         gbc.gridx = 1;
         panelFormPasajero.add(txtCampoExtra, gbc);
 
-        JButton btnAgregarPasajero = new JButton("Agregar pasajero");
-        JButton btnQuitarPasajero = new JButton("Quitar pasajero seleccionado");
+        JButton btnAgregarPasajero = Estilos.botonPrincipal("Agregar pasajero");
+        JButton btnQuitarPasajero = Estilos.botonVolver("Quitar pasajero seleccionado");
         gbc.gridx = 0; gbc.gridy = 6; gbc.gridwidth = 2;
-        JPanel panelBotonesPasajero = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel panelBotonesPasajero = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
+        panelBotonesPasajero.setBackground(Estilos.FONDO_PANEL);
         panelBotonesPasajero.add(btnAgregarPasajero);
         panelBotonesPasajero.add(btnQuitarPasajero);
         panelFormPasajero.add(panelBotonesPasajero, gbc);
@@ -142,6 +159,7 @@ public class PanelReserva extends JPanel {
             }
         };
         tablaPasajeros = new JTable(modeloPasajeros);
+        Estilos.estilizarTabla(tablaPasajeros);
 
         panelPasajeros.add(panelFormPasajero, BorderLayout.NORTH);
         panelPasajeros.add(new JScrollPane(tablaPasajeros), BorderLayout.CENTER);
@@ -151,39 +169,47 @@ public class PanelReserva extends JPanel {
 
         // ============== Pestaña 3: Asientos ==============
         JPanel panelAsientos = new JPanel(new BorderLayout(10, 10));
+        Estilos.aplicarFondoSecundario(panelAsientos);
+        panelAsientos.setBackground(Estilos.FONDO_PANEL);
         JPanel panelFormAsiento = new JPanel(new GridBagLayout());
+        panelFormAsiento.setBackground(Estilos.FONDO_PANEL);
         GridBagConstraints gbc2 = new GridBagConstraints();
-        gbc2.insets = new Insets(5, 5, 5, 5);
+        gbc2.insets = new Insets(8, 8, 8, 8);
         gbc2.fill = GridBagConstraints.HORIZONTAL;
 
         gbc2.gridx = 0; gbc2.gridy = 0;
-        panelFormAsiento.add(new JLabel("Vuelo:"), gbc2);
+        panelFormAsiento.add(Estilos.labelCampo("Vuelo:"), gbc2);
         cmbVueloAsiento = new JComboBox<>();
+        Estilos.estilizarCombo(cmbVueloAsiento);
         gbc2.gridx = 1;
         panelFormAsiento.add(cmbVueloAsiento, gbc2);
 
         gbc2.gridx = 0; gbc2.gridy = 1;
-        panelFormAsiento.add(new JLabel("Pasajero:"), gbc2);
+        panelFormAsiento.add(Estilos.labelCampo("Pasajero:"), gbc2);
         cmbPasajeroAsiento = new JComboBox<>();
+        Estilos.estilizarCombo(cmbPasajeroAsiento);
         gbc2.gridx = 1;
         panelFormAsiento.add(cmbPasajeroAsiento, gbc2);
 
         gbc2.gridx = 0; gbc2.gridy = 2;
-        panelFormAsiento.add(new JLabel("Categoria de asiento:"), gbc2);
+        panelFormAsiento.add(Estilos.labelCampo("Categoria de asiento:"), gbc2);
         cmbCategoriaAsiento = new JComboBox<>(new String[]{"Todas", "Economica", "Ejecutiva", "Primera Clase"});
+        Estilos.estilizarCombo(cmbCategoriaAsiento);
         gbc2.gridx = 1;
         panelFormAsiento.add(cmbCategoriaAsiento, gbc2);
 
         gbc2.gridx = 0; gbc2.gridy = 3;
-        panelFormAsiento.add(new JLabel("Asiento disponible:"), gbc2);
+        panelFormAsiento.add(Estilos.labelCampo("Asiento disponible:"), gbc2);
         cmbAsientoDisponible = new JComboBox<>();
+        Estilos.estilizarCombo(cmbAsientoDisponible);
         gbc2.gridx = 1;
         panelFormAsiento.add(cmbAsientoDisponible, gbc2);
 
-        JButton btnCargarAsientos = new JButton("Cargar asientos disponibles");
-        JButton btnAsignarAsiento = new JButton("Asignar asiento");
+        JButton btnCargarAsientos = Estilos.botonSecundario("Cargar asientos disponibles");
+        JButton btnAsignarAsiento = Estilos.botonPrincipal("Asignar asiento");
         gbc2.gridx = 0; gbc2.gridy = 4; gbc2.gridwidth = 2;
-        JPanel panelBotonesAsiento = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel panelBotonesAsiento = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 8));
+        panelBotonesAsiento.setBackground(Estilos.FONDO_PANEL);
         panelBotonesAsiento.add(btnCargarAsientos);
         panelBotonesAsiento.add(btnAsignarAsiento);
         panelFormAsiento.add(panelBotonesAsiento, gbc2);
@@ -196,6 +222,7 @@ public class PanelReserva extends JPanel {
             }
         };
         tablaAsientos = new JTable(modeloAsientos);
+        Estilos.estilizarTabla(tablaAsientos);
 
         panelAsientos.add(panelFormAsiento, BorderLayout.NORTH);
         panelAsientos.add(new JScrollPane(tablaAsientos), BorderLayout.CENTER);
@@ -205,14 +232,17 @@ public class PanelReserva extends JPanel {
 
         // ============== Panel inferior: total y confirmar ==============
         JPanel panelInferior = new JPanel(new BorderLayout(10, 10));
+        panelInferior.setBackground(Estilos.FONDO_CLARO);
         lblTotal = new JLabel("Valor informativo total: $0.00", SwingConstants.CENTER);
-        lblTotal.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lblTotal.setFont(Estilos.FUENTE_BOLD);
+        lblTotal.setForeground(Estilos.AZUL_MARINO);
         panelInferior.add(lblTotal, BorderLayout.NORTH);
 
         JPanel panelBotonesFinales = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
-        JButton btnCalcularTotal = new JButton("Calcular total");
-        JButton btnConfirmar = new JButton("Confirmar reserva");
-        JButton btnVolver = new JButton("Volver al menu");
+        panelBotonesFinales.setBackground(Estilos.FONDO_CLARO);
+        JButton btnCalcularTotal = Estilos.botonSecundario("Calcular total");
+        JButton btnConfirmar = Estilos.botonPrincipal("Confirmar reserva");
+        JButton btnVolver = Estilos.botonVolver("Volver al menu");
         panelBotonesFinales.add(btnCalcularTotal);
         panelBotonesFinales.add(btnConfirmar);
         panelBotonesFinales.add(btnVolver);

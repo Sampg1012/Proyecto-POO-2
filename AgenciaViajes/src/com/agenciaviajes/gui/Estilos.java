@@ -2,6 +2,7 @@ package com.agenciaviajes.gui;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 
 /**
@@ -200,15 +201,75 @@ public class Estilos {
     }
 
     /**
-     * Estiliza un JTextField con bordes redondeados y padding.
+     * Estiliza un campo de texto o area de texto con bordes suaves y padding.
      */
-    public static void estilizarCampo(JTextField campo) {
+    public static void estilizarCampo(JTextComponent campo) {
         campo.setFont(FUENTE_NORMAL);
         campo.setBackground(Color.WHITE);
         campo.setForeground(TEXTO_OSCURO);
+        campo.setCaretColor(TEXTO_OSCURO);
         campo.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDE_SUAVE, 1, true),
-                BorderFactory.createEmptyBorder(6, 10, 6, 10)
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+    }
+
+    /**
+     * Estiliza un JComboBox con borde y tipografia del sistema.
+     */
+    public static void estilizarCombo(JComboBox<?> combo) {
+        combo.setFont(FUENTE_NORMAL);
+        combo.setBackground(Color.WHITE);
+        combo.setForeground(TEXTO_OSCURO);
+        combo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDE_SUAVE, 1, true),
+                BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        ));
+        combo.setOpaque(true);
+    }
+
+    /**
+     * Estiliza un JCheckBox simple para que combine con los paneles.
+     */
+    public static void estilizarCheckBox(JCheckBox casilla) {
+        casilla.setFont(FUENTE_NORMAL);
+        casilla.setForeground(TEXTO_OSCURO);
+        casilla.setBackground(FONDO_CLARO);
+    }
+
+    /**
+     * Estiliza un JTextArea como un panel de texto informativo.
+     */
+    public static void estilizarAreaTexto(JTextArea area) {
+        area.setFont(FUENTE_NORMAL);
+        area.setForeground(TEXTO_OSCURO);
+        area.setBackground(Color.WHITE);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        area.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDE_SUAVE, 1, true),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+    }
+
+    /**
+     * Estiliza un JTabbedPane para que sea más suave y moderno.
+     */
+    public static void estilizarPestanas(JTabbedPane pestanas) {
+        pestanas.setFont(FUENTE_BOLD);
+        pestanas.setBackground(FONDO_CLARO);
+        pestanas.setForeground(TEXTO_OSCURO);
+        pestanas.setBorder(BorderFactory.createLineBorder(BORDE_SUAVE, 1, true));
+    }
+
+    /**
+     * Crea un panel secundario con borde suave y fondo uniforme.
+     */
+    public static void aplicarFondoSecundario(JPanel panel) {
+        panel.setBackground(FONDO_PANEL);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDE_SUAVE, 1, true),
+                BorderFactory.createEmptyBorder(12, 12, 12, 12)
         ));
     }
 

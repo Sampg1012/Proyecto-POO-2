@@ -33,61 +33,71 @@ public class PanelConsultaVuelos extends JPanel {
 
     public PanelConsultaVuelos(VentanaPrincipal ventana, AgenciaViajes agencia) {
         this.agencia = agencia;
-        setLayout(new BorderLayout(10, 10));
+        setLayout(new BorderLayout(12, 12));
+        setBackground(Estilos.FONDO_CLARO);
         setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
-        JLabel titulo = new JLabel("Consulta de Vuelos", SwingConstants.CENTER);
-        titulo.setFont(new Font("SansSerif", Font.BOLD, 20));
-        add(titulo, BorderLayout.NORTH);
+        add(Estilos.crearHeader("Consulta de Vuelos"), BorderLayout.NORTH);
 
         // ---- Panel de filtros ----
         JPanel panelFiltros = new JPanel(new GridBagLayout());
+        Estilos.aplicarFondoSecundario(panelFiltros);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0; gbc.gridy = 0;
-        panelFiltros.add(new JLabel("Origen:"), gbc);
+        panelFiltros.add(Estilos.labelCampo("Origen:"), gbc);
         cmbOrigen = new JComboBox<>();
         cmbOrigen.addItem("");
         for (String c : CatalogoDatos.todasLasCiudades()) cmbOrigen.addItem(c);
         cmbOrigen.setEditable(false);
+        Estilos.estilizarCombo(cmbOrigen);
         gbc.gridx = 1;
         panelFiltros.add(cmbOrigen, gbc);
 
         gbc.gridx = 2;
-        panelFiltros.add(new JLabel("Destino:"), gbc);
+        panelFiltros.add(Estilos.labelCampo("Destino:"), gbc);
         cmbDestino = new JComboBox<>();
         cmbDestino.addItem("");
         for (String c : CatalogoDatos.todasLasCiudades()) cmbDestino.addItem(c);
         cmbDestino.setEditable(false);
+        Estilos.estilizarCombo(cmbDestino);
         gbc.gridx = 3;
         panelFiltros.add(cmbDestino, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        panelFiltros.add(new JLabel("Fecha (AAAA-MM-DD, opcional):"), gbc);
-        txtFecha = new JTextField(10);
+        panelFiltros.add(Estilos.labelCampo("Fecha (AAAA-MM-DD, opcional):"), gbc);
+        txtFecha = new JTextField(12);
+        Estilos.estilizarCampo(txtFecha);
         gbc.gridx = 1;
         panelFiltros.add(txtFecha, gbc);
 
         gbc.gridx = 2;
-        panelFiltros.add(new JLabel("Aerolinea (opcional):"), gbc);
-        txtAerolinea = new JTextField(10);
+        panelFiltros.add(Estilos.labelCampo("Aerolinea (opcional):"), gbc);
+        txtAerolinea = new JTextField(12);
+        Estilos.estilizarCampo(txtAerolinea);
         gbc.gridx = 3;
         panelFiltros.add(txtAerolinea, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
         chkSoloDirectos = new JCheckBox("Solo vuelos directos");
+        Estilos.estilizarCheckBox(chkSoloDirectos);
+        gbc.gridwidth = 2;
         panelFiltros.add(chkSoloDirectos, gbc);
+        gbc.gridwidth = 1;
 
-        gbc.gridx = 1;
-        panelFiltros.add(new JLabel("Ordenar por:"), gbc);
-        cmbOrden = new JComboBox<>(new String[]{"Horario", "Tarifa de referencia"});
         gbc.gridx = 2;
+        panelFiltros.add(Estilos.labelCampo("Ordenar por:"), gbc);
+        cmbOrden = new JComboBox<>(new String[]{"Horario", "Tarifa de referencia"});
+        Estilos.estilizarCombo(cmbOrden);
+        gbc.gridx = 3;
         panelFiltros.add(cmbOrden, gbc);
 
-        JButton btnBuscar = new JButton("Buscar vuelos");
+        JButton btnBuscar = Estilos.botonPrincipal("Buscar vuelos");
         gbc.gridx = 3;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
         panelFiltros.add(btnBuscar, gbc);
 
         // ---- Tabla de resultados ----
