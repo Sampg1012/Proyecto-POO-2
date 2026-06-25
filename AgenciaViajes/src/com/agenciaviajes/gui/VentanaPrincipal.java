@@ -2,16 +2,11 @@ package com.agenciaviajes.gui;
 
 import com.agenciaviajes.modelo.AgenciaViajes;
 import com.agenciaviajes.persistencia.GestorPersistencia;
-
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.*;
 
-/**
- * Ventana principal de la aplicacion. Administra la navegacion entre
- * los distintos paneles (pantallas) mediante un CardLayout.
- */
 public class VentanaPrincipal extends JFrame {
 
     public static final String PANEL_BIENVENIDA = "BIENVENIDA";
@@ -68,7 +63,6 @@ public class VentanaPrincipal extends JFrame {
 
         add(panelContenedor);
 
-        // Guardar los datos automaticamente al cerrar la aplicacion
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -83,18 +77,17 @@ public class VentanaPrincipal extends JFrame {
                     dispose();
                     System.exit(0);
                 }
-                // Si es CANCEL, no se hace nada
             }
         });
 
         mostrarPanel(PANEL_BIENVENIDA);
     }
 
-    /**
-     * Muestra el panel correspondiente segun su nombre y actualiza
-     * la informacion mostrada (si aplica).
-     */
     public void mostrarPanel(String nombrePanel) {
+        mostrarPanel(nombrePanel, null);
+    }
+
+    public void mostrarPanel(String nombrePanel, String idVueloPreseleccionado) {
         switch (nombrePanel) {
             case PANEL_MENU:
                 panelMenu.actualizar();
@@ -103,6 +96,9 @@ public class VentanaPrincipal extends JFrame {
                 panelConsultaVuelos.actualizar();
                 break;
             case PANEL_RESERVA:
+                if (idVueloPreseleccionado != null) {
+                    panelReserva.preseleccionarVuelo(idVueloPreseleccionado);
+                }
                 panelReserva.actualizar();
                 break;
             case PANEL_MIS_RESERVAS:
@@ -121,9 +117,6 @@ public class VentanaPrincipal extends JFrame {
         return agencia;
     }
 
-    /**
-     * Permite a un panel solicitar guardar los datos de inmediato.
-     */
     public void guardarDatos() {
         GestorPersistencia.guardar(agencia);
     }

@@ -6,37 +6,33 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
-/**
- * Pantalla para crear una nueva reserva. Permite:
- * 1) Agregar vuelos al itinerario (a partir del id del vuelo).
- * 2) Agregar pasajeros (adulto, nino o adulto mayor).
- * 3) Asignar asientos disponibles a cada pasajero.
- * 4) Confirmar la reserva, calculando el valor informativo total.
- */
 public class PanelReserva extends JPanel {
 
     private final VentanaPrincipal ventana;
     private final AgenciaViajes agencia;
     private Reserva reservaActual;
 
-    // Itinerario
+    // ID de un vuelo que otra pantalla (Consulta de Vuelos) quiere
+    // dejar listo en el campo de texto la proxima vez que se muestre
+    // este panel. No se agrega automaticamente: el usuario decide
+    // cuando darle clic a "Agregar al itinerario". Se consume una sola vez.
+    private String idVueloPreseleccionado;
+
     private final JTextField txtIdVuelo;
     private final DefaultTableModel modeloItinerario;
     private final JTable tablaItinerario;
 
-    // Pasajeros
     private final JTextField txtPasId;
     private final JTextField txtPasNombre;
     private final JTextField txtPasEdad;
     private final JTextField txtPasContacto;
     private final JComboBox<String> cmbTipoPasajero;
-    private final JTextField txtCampoExtra; // acompanante (Nino)
-    private final JComboBox<String> cmbCampoExtra; // asistencia (Adulto Mayor)
+    private final JTextField txtCampoExtra;
+    private final JComboBox<String> cmbCampoExtra;
     private final JLabel lblCampoExtra;
     private final DefaultTableModel modeloPasajeros;
     private final JTable tablaPasajeros;
 
-    // Asientos
     private final JComboBox<String> cmbVueloAsiento;
     private final JComboBox<String> cmbPasajeroAsiento;
     private final JComboBox<String> cmbCategoriaAsiento;
@@ -279,6 +275,17 @@ public class PanelReserva extends JPanel {
     }
 
     /**
+     * Permite que otra pantalla (por ejemplo, Consulta de Vuelos) deje listo
+     * un ID de vuelo en el campo de texto la proxima vez que este panel se
+     * muestre. No agrega el vuelo automaticamente: el usuario sigue teniendo
+     * el control y debe darle clic a "Agregar al itinerario". Se consume
+     * una sola vez dentro de actualizar().
+     */
+    public void preseleccionarVuelo(String idVuelo) {
+        this.idVueloPreseleccionado = idVuelo;
+    }
+
+    /**
      * Se ejecuta cada vez que se muestra el panel: crea una nueva reserva en progreso.
      */
     public void actualizar() {
@@ -294,13 +301,19 @@ public class PanelReserva extends JPanel {
         cmbCategoriaAsiento.setSelectedIndex(0);
         cmbAsientoDisponible.removeAllItems();
         lblTotal.setText("Valor informativo total: $0.00");
-        txtIdVuelo.setText("");
         txtPasId.setText("");
         txtPasNombre.setText("");
         txtPasEdad.setText("");
         txtPasContacto.setText("");
         txtCampoExtra.setText("");
         cmbCampoExtra.setSelectedIndex(0);
+
+        if (idVueloPreseleccionado != null) {
+            txtIdVuelo.setText(idVueloPreseleccionado);
+            idVueloPreseleccionado = null;
+        } else {
+            txtIdVuelo.setText("");
+        }
     }
 
     private void actualizarCampoExtra() {
@@ -590,10 +603,6 @@ public class PanelReserva extends JPanel {
         }
     }
 
-    /**
-     * Si el usuario abandona la pantalla sin confirmar, se elimina la reserva
-     * vacia que se habia creado al entrar, liberando los asientos asignados.
-     */
     private void descartarReservaEnProgreso() {
         if (reservaActual == null) return;
         reservaActual.cancelar();

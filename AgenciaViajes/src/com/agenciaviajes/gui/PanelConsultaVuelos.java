@@ -1,21 +1,15 @@
 package com.agenciaviajes.gui;
 
 import com.agenciaviajes.modelo.AgenciaViajes;
-import com.agenciaviajes.modelo.Vuelo;
 import com.agenciaviajes.modelo.CatalogoDatos;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import com.agenciaviajes.modelo.Vuelo;
 import java.awt.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
-/**
- * Pantalla de consulta de vuelos. Permite buscar vuelos entre dos ciudades
- * filtrando por fecha, aerolinea y preferencia de vuelo directo, y ordenar
- * los resultados por horario o por tarifa de referencia.
- */
 public class PanelConsultaVuelos extends JPanel {
 
     private final AgenciaViajes agencia;
@@ -39,7 +33,6 @@ public class PanelConsultaVuelos extends JPanel {
 
         add(Estilos.crearHeader("Consulta de Vuelos"), BorderLayout.NORTH);
 
-        // ---- Panel de filtros ----
         JPanel panelFiltros = new JPanel(new GridBagLayout());
         Estilos.aplicarFondoSecundario(panelFiltros);
         GridBagConstraints gbc = new GridBagConstraints();
@@ -100,7 +93,6 @@ public class PanelConsultaVuelos extends JPanel {
         gbc.anchor = GridBagConstraints.EAST;
         panelFiltros.add(btnBuscar, gbc);
 
-        // ---- Tabla de resultados ----
         String[] columnas = {"ID", "Origen", "Destino", "Fecha", "Salida", "Llegada",
                 "Duracion", "Aerolinea", "Tipo", "Tarifa final", "Directo/Escala", "Estado", "Asientos disp."};
         modeloTabla = new DefaultTableModel(columnas, 0) {
@@ -112,30 +104,40 @@ public class PanelConsultaVuelos extends JPanel {
         tabla = new JTable(modeloTabla);
         JScrollPane scrollTabla = new JScrollPane(tabla);
 
-        // ---- Panel central con filtros arriba y tabla abajo ----
         JPanel panelCentral = new JPanel(new BorderLayout(10, 10));
         panelCentral.add(panelFiltros, BorderLayout.NORTH);
         panelCentral.add(scrollTabla, BorderLayout.CENTER);
         add(panelCentral, BorderLayout.CENTER);
 
-        // ---- Panel de estado de vuelo ----
         JPanel panelInferior = new JPanel(new BorderLayout(5, 5));
         areaEstado = new JTextArea(3, 0);
         areaEstado.setEditable(false);
         areaEstado.setBorder(BorderFactory.createTitledBorder("Estado del vuelo seleccionado"));
         panelInferior.add(areaEstado, BorderLayout.CENTER);
 
+        JButton btnCrearReserva = Estilos.botonPrincipal("Crear reserva con este vuelo");
         JButton btnVolver = new JButton("Volver al menu");
         JPanel panelBotonesInferior = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelBotonesInferior.add(btnCrearReserva);
         panelBotonesInferior.add(btnVolver);
         panelInferior.add(panelBotonesInferior, BorderLayout.SOUTH);
 
         add(panelInferior, BorderLayout.SOUTH);
 
-        // ---- Eventos ----
         btnBuscar.addActionListener(e -> buscarVuelos());
 
         tabla.getSelectionModel().addListSelectionListener(e -> mostrarEstadoVueloSeleccionado());
+
+        btnCrearReserva.addActionListener(e -> {
+            int fila = tabla.getSelectedRow();
+            if (fila < 0) {
+                JOptionPane.showMessageDialog(this, "Seleccione un vuelo de la tabla.",
+                        "Aviso", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            String idVuelo = (String) modeloTabla.getValueAt(fila, 0);
+            ventana.mostrarPanel(VentanaPrincipal.PANEL_RESERVA, idVuelo);
+        });
 
         btnVolver.addActionListener(e -> ventana.mostrarPanel(VentanaPrincipal.PANEL_MENU));
     }
@@ -167,7 +169,6 @@ public class PanelConsultaVuelos extends JPanel {
 
         List<Vuelo> resultados;
         if (cmbOrden.getSelectedIndex() == 1) {
-            // Ordenar por tarifa de referencia
             resultados = agencia.consultarVuelosPorTarifa(origen, destino);
             if (fecha != null) {
                 LocalDate f = fecha;
@@ -253,9 +254,6 @@ public class PanelConsultaVuelos extends JPanel {
         areaEstado.setText(sb.toString());
     }
 
-    /**
-     * Refresca la tabla al mostrar el panel (limpia resultados anteriores).
-     */
     public void actualizar() {
         modeloTabla.setRowCount(0);
         areaEstado.setText("");
