@@ -194,44 +194,61 @@ public class PanelConsultaVuelos extends JPanel {
         if (esRetorno && !"Ida y vuelta".equals(cmbTipoViaje.getSelectedItem())) {
             return;
         }
-        LocalDate fechaBase = leerFechaDesdeCampo(txtFechaIda);
+        LocalDate fechaBase = leerFechaDesdeCampo(campoDestino);
         if (esRetorno) {
-            if (fechaBase == null) {
+            LocalDate fechaIda = leerFechaDesdeCampo(txtFechaIda);
+            if (fechaIda == null) {
                 JOptionPane.showMessageDialog(this, "Primero seleccione la fecha de ida.",
                         "Fecha de ida requerida", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            fechaBase = fechaBase.plusDays(1);
+            fechaBase = fechaBase == null ? fechaIda.plusDays(1) : fechaBase;
         } else {
             fechaBase = fechaBase == null ? LocalDate.now() : fechaBase;
         }
 
-        JPopupMenu popup = new JPopupMenu();
+        Window ventanaPadre = SwingUtilities.getWindowAncestor(this);
+        JDialog dialogo = new JDialog(ventanaPadre, "Seleccionar fecha", Dialog.ModalityType.MODELESS);
+        dialogo.setUndecorated(true);
+        dialogo.setAlwaysOnTop(true);
+        dialogo.setResizable(false);
+
         JPanel panel = new JPanel(new BorderLayout(6, 6));
-        panel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Estilos.AZUL_MARINO, 1),
+                BorderFactory.createEmptyBorder(8, 8, 8, 8)));
 
         JPanel panelCabecera = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 4));
+        panelCabecera.setBackground(Color.WHITE);
         JComboBox<Integer> cmbMes = new JComboBox<>(new Integer[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12});
         JComboBox<Integer> cmbAnio = new JComboBox<>(new Integer[]{LocalDate.now().getYear(), LocalDate.now().getYear() + 1, LocalDate.now().getYear() + 2});
         JButton btnHoy = new JButton("Hoy");
+        JButton btnCerrar = new JButton("Cerrar");
         cmbMes.setSelectedItem(fechaBase.getMonthValue());
         cmbAnio.setSelectedItem(fechaBase.getYear());
 
         panelCabecera.add(cmbMes);
         panelCabecera.add(cmbAnio);
         panelCabecera.add(btnHoy);
+        panelCabecera.add(btnCerrar);
         panel.add(panelCabecera, BorderLayout.NORTH);
 
         JPanel panelDias = new JPanel(new GridLayout(0, 7, 4, 4));
+        panelDias.setBackground(Color.WHITE);
         String[] encabezados = {"D", "L", "M", "M", "J", "V", "S"};
         for (String encabezado : encabezados) {
-            panelDias.add(new JLabel(encabezado, SwingConstants.CENTER));
+            JLabel etiqueta = new JLabel(encabezado, SwingConstants.CENTER);
+            etiqueta.setFont(Estilos.FUENTE_NORMAL);
+            panelDias.add(etiqueta);
         }
 
         Runnable refrescarDias = () -> {
             panelDias.removeAll();
             for (String encabezado : encabezados) {
-                panelDias.add(new JLabel(encabezado, SwingConstants.CENTER));
+                JLabel etiqueta = new JLabel(encabezado, SwingConstants.CENTER);
+                etiqueta.setFont(Estilos.FUENTE_NORMAL);
+                panelDias.add(etiqueta);
             }
             int mes = (Integer) cmbMes.getSelectedItem();
             int anio = (Integer) cmbAnio.getSelectedItem();
@@ -256,10 +273,11 @@ public class PanelConsultaVuelos extends JPanel {
                     valida = !fecha.isBefore(hoy) && !fecha.isAfter(hoy.plusDays(330));
                 }
                 JButton botonDia = new JButton(String.valueOf(dia));
+                botonDia.setFocusPainted(false);
                 botonDia.setEnabled(valida);
                 botonDia.addActionListener(ev -> {
                     campoDestino.setText(fecha.format(FORMATO_FECHA));
-                    popup.setVisible(false);
+                    dialogo.dispose();
                 });
                 panelDias.add(botonDia);
             }
@@ -273,11 +291,16 @@ public class PanelConsultaVuelos extends JPanel {
             cmbMes.setSelectedItem(LocalDate.now().getMonthValue());
             cmbAnio.setSelectedItem(LocalDate.now().getYear());
         });
+        btnCerrar.addActionListener(e -> dialogo.dispose());
 
         panel.add(new JScrollPane(panelDias), BorderLayout.CENTER);
         refrescarDias.run();
-        popup.add(panel);
-        popup.show(this, 0, this.getHeight());
+        dialogo.getContentPane().add(panel);
+        dialogo.pack();
+
+        Point ubicacion = campoDestino.getLocationOnScreen();
+        dialogo.setLocation(ubicacion.x, ubicacion.y + campoDestino.getHeight() + 4);
+        dialogo.setVisible(true);
     }
 
     private LocalDate leerFechaDesdeCampo(JTextField campo) {
