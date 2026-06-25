@@ -29,9 +29,11 @@ public abstract class Vuelo implements Serializable {
     private double tarifaBase;
     private EstadoVuelo estado;
     private Aerolinea aerolinea;
-    private List<Asiento> asientos;
+    private final List<Asiento> asientos;
     private boolean esDirecto;
-    private List<String> ciudadesEscala;
+    private final List<String> ciudadesEscala;
+    private int diasMinimosEstadia;
+    private int diasMaximosEstadia;
 
     public Vuelo(String id, String origen, String destino, LocalDate fecha,
                   LocalTime horaSalida, LocalTime horaLlegada, double tarifaBase,
@@ -48,6 +50,8 @@ public abstract class Vuelo implements Serializable {
         this.asientos = new ArrayList<>();
         this.esDirecto = esDirecto;
         this.ciudadesEscala = new ArrayList<>();
+        this.diasMinimosEstadia = 3;
+        this.diasMaximosEstadia = 90;
     }
 
     // ---- Getters y setters ----
@@ -136,6 +140,22 @@ public abstract class Vuelo implements Serializable {
         return ciudadesEscala;
     }
 
+    public int getDiasMinimosEstadia() {
+        return diasMinimosEstadia;
+    }
+
+    public void setDiasMinimosEstadia(int diasMinimosEstadia) {
+        this.diasMinimosEstadia = Math.max(0, diasMinimosEstadia);
+    }
+
+    public int getDiasMaximosEstadia() {
+        return diasMaximosEstadia;
+    }
+
+    public void setDiasMaximosEstadia(int diasMaximosEstadia) {
+        this.diasMaximosEstadia = Math.max(0, diasMaximosEstadia);
+    }
+
     public void agregarAsiento(Asiento asiento) {
         asientos.add(asiento);
     }
@@ -159,7 +179,7 @@ public abstract class Vuelo implements Serializable {
      * Indica si el vuelo tiene asientos disponibles.
      */
     public boolean consultarDisponibilidad() {
-        return obtenerAsientosDisponibles().size() > 0;
+        return !obtenerAsientosDisponibles().isEmpty();
     }
 
     /**
@@ -203,6 +223,13 @@ public abstract class Vuelo implements Serializable {
             return asiento.reservar();
         }
         return false;
+    }
+
+    public boolean cumpleReglasEstadia(int diasEstadia) {
+        if (diasEstadia < diasMinimosEstadia) {
+            return false;
+        }
+        return diasMaximosEstadia <= 0 || diasEstadia <= diasMaximosEstadia;
     }
 
     /**

@@ -3,6 +3,7 @@ package com.agenciaviajes.gui;
 import com.agenciaviajes.modelo.*;
 import java.awt.*;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -395,7 +396,7 @@ public class PanelReserva extends JPanel {
         String edadTexto = txtPasEdad.getText().trim();
         String contacto = txtPasContacto.getText().trim();
         String tipo = (String) cmbTipoPasajero.getSelectedItem();
-        String extra = "";
+        String extra;
         if ("Adulto Mayor".equals(tipo)) {
             extra = (String) cmbCampoExtra.getSelectedItem();
         } else {
@@ -480,6 +481,7 @@ public class PanelReserva extends JPanel {
             }
         }
         modeloPasajeros.removeRow(fila);
+        recargarTablaAsientos();
     }
 
     private void cargarAsientosDisponibles() {
@@ -539,14 +541,18 @@ public class PanelReserva extends JPanel {
             return;
         }
 
+        boolean asignado;
         if (reservaActual.getAsientosAsignados().containsKey(pasajero.getId())) {
-            JOptionPane.showMessageDialog(this,
-                    "Este pasajero ya tiene un asiento asignado.",
-                    "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
+            asignado = reservaActual.reasignarAsientoAPasajero(pasajero, asiento);
+            if (asignado) {
+                JOptionPane.showMessageDialog(this,
+                        "Asiento cambiado correctamente para el pasajero.",
+                        "Asiento actualizado", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else {
+            asignado = reservaActual.asignarAsientoAPasajero(pasajero, asiento);
         }
 
-        boolean asignado = reservaActual.asignarAsientoAPasajero(pasajero, asiento);
         if (!asignado) {
             JOptionPane.showMessageDialog(this,
                     "No fue posible asignar el asiento (puede que ya este ocupado o ya tenga uno asignado).",
@@ -554,15 +560,36 @@ public class PanelReserva extends JPanel {
             return;
         }
 
-        modeloAsientos.addRow(new Object[]{
-                pasajero.getNombre(), vuelo.getId(), asiento.getNumero(),
-                asiento.getCategoria(),
-                String.format("$%.0f", asiento.calcularRecargo(vuelo.calcularTarifaFinal())),
-                asiento.getServicios()
-        });
-
+        recargarTablaAsientos();
         cargarAsientosDisponibles();
         actualizarTotal();
+    }
+
+    private void recargarTablaAsientos() {
+        modeloAsientos.setRowCount(0);
+        if (reservaActual == null) {
+            return;
+        }
+        for (Map.Entry<String, Asiento> entry : reservaActual.getAsientosAsignados().entrySet()) {
+            Pasajero pasajero = reservaActual.getPasajeros().stream()
+                    .filter(p -> p.getId().equals(entry.getKey()))
+                    .findFirst()
+                    .orElse(null);
+            Asiento asiento = entry.getValue();
+            if (pasajero == null || asiento == null) {
+                continue;
+            }
+            Vuelo vuelo = agencia.buscarVueloPorId((String) cmbVueloAsiento.getSelectedItem());
+            if (vuelo == null) {
+                continue;
+            }
+            modeloAsientos.addRow(new Object[]{
+                    pasajero.getNombre(), vuelo.getId(), asiento.getNumero(),
+                    asiento.getCategoria(),
+                    String.format("$%.0f", asiento.calcularRecargo(vuelo.calcularTarifaFinal())),
+                    asiento.getServicios()
+            });
+        }
     }
 
     private void actualizarTotal() {

@@ -21,12 +21,12 @@ public class Reserva implements Serializable {
 
     private String id;
     private Usuario usuario;
-    private List<Pasajero> pasajeros;
+    private final List<Pasajero> pasajeros;
     private Itinerario itinerario;
     private LocalDate fechaReserva;
     private EstadoReserva estado;
     // Mapa: pasajero (id) -> asiento asignado
-    private Map<String, Asiento> asientosAsignados;
+    private final Map<String, Asiento> asientosAsignados;
 
     public Reserva(String id, Usuario usuario) {
         this.id = id;
@@ -132,6 +132,33 @@ public class Reserva implements Serializable {
         }
         if (!asiento.reservar()) {
             return false; // El asiento no esta disponible
+        }
+        asientosAsignados.put(pasajero.getId(), asiento);
+        return true;
+    }
+
+    public boolean reasignarAsientoAPasajero(Pasajero pasajero, Asiento asiento) {
+        if (pasajero == null || asiento == null) {
+            return false;
+        }
+        if (!pasajeros.contains(pasajero)) {
+            return false;
+        }
+        Asiento asientoActual = asientosAsignados.get(pasajero.getId());
+        if (asientoActual != null && asientoActual.getNumero().equals(asiento.getNumero())) {
+            return true;
+        }
+        if (asientoActual != null) {
+            asientoActual.liberar();
+        }
+        if (asientosAsignados.containsValue(asiento) && asientoActual != null && !asientoActual.getNumero().equals(asiento.getNumero())) {
+            return false;
+        }
+        if (!asiento.reservar()) {
+            if (asientoActual != null) {
+                asientoActual.reservar();
+            }
+            return false;
         }
         asientosAsignados.put(pasajero.getId(), asiento);
         return true;

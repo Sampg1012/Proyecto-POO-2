@@ -2,6 +2,7 @@ package com.agenciaviajes.modelo;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,10 +47,9 @@ public class GeneradorVuelos {
             Aerolinea aero = obtenerAerolineaAleatoria(aerolinea, internacional);
             LocalDate fechaVuelo;
             if (fecha != null) {
-                // Si el usuario solicita una fecha pasada, usar la fecha actual en su lugar
                 fechaVuelo = fecha.isBefore(LocalDate.now()) ? LocalDate.now() : fecha;
             } else {
-                fechaVuelo = LocalDate.now().plusDays(random.nextInt(30));
+                fechaVuelo = LocalDate.now().plusDays(random.nextInt(60));
             }
             boolean esDirecto = internacional ? random.nextBoolean() : true;
 
@@ -69,7 +69,9 @@ public class GeneradorVuelos {
                 vuelo.getCiudadesEscala().add(CatalogoDatos.obtenerEscalaAleatoria());
             }
 
+            aplicarReglasTarifa(vuelo);
             crearAsientos(vuelo);
+            asignarEstadoVuelo(vuelo);
             vuelos.add(vuelo);
         }
         return vuelos;
@@ -91,6 +93,32 @@ public class GeneradorVuelos {
         return texto == null ? "" : texto.trim();
     }
 
+    private static void aplicarReglasTarifa(Vuelo vuelo) {
+        if (vuelo == null) {
+            return;
+        }
+        boolean internacional = vuelo instanceof VueloInternacional;
+        vuelo.setDiasMinimosEstadia(internacional ? 5 : 3);
+        vuelo.setDiasMaximosEstadia(internacional ? 180 : 90);
+    }
+
+    private static void asignarEstadoVuelo(Vuelo vuelo) {
+        if (vuelo == null) {
+            return;
+        }
+        LocalDate hoy = LocalDate.now();
+        long dias = ChronoUnit.DAYS.between(hoy, vuelo.getFecha());
+        if (dias < 0) {
+            vuelo.cambiarEstado(Vuelo.EstadoVuelo.FINALIZADO);
+        } else if (dias == 0) {
+            vuelo.cambiarEstado(random.nextBoolean() ? Vuelo.EstadoVuelo.EN_HORA : Vuelo.EstadoVuelo.RETRASADO);
+        } else if (dias <= 2) {
+            vuelo.cambiarEstado(random.nextBoolean() ? Vuelo.EstadoVuelo.PROGRAMADO : Vuelo.EstadoVuelo.EN_HORA);
+        } else {
+            vuelo.cambiarEstado(Vuelo.EstadoVuelo.PROGRAMADO);
+        }
+    }
+
     public static void crearAsientos(Vuelo vuelo) {
         if (vuelo == null) {
             return;
@@ -101,19 +129,18 @@ public class GeneradorVuelos {
                 .getOrDefault(destinoNormalizado, CatalogoDatos.CategoriaInternacional.REGIONAL);
 
         if (!internacional || categoriaInternacional == CatalogoDatos.CategoriaInternacional.REGIONAL) {
-            // Aumentar el minimo de filas de Primera Clase para que haya mas asientos
-            int filasPrimera = random.nextInt(2) + 2; // 2-3 filas primera clase
-            int filasEjecutiva = random.nextInt(2) + 3; // 3-4 filas ejecutiva
-            int filasEconomica = random.nextInt(6) + 22; // 22-27 filas econ
-            crearSeccionAsientos(vuelo, 1, filasPrimera, new char[]{'A', 'D'}, "Primera Clase");
-            crearSeccionAsientos(vuelo, filasPrimera + 1, filasEjecutiva, new char[]{'A', 'C', 'D', 'F'}, "Ejecutiva");
+            int filasPrimera = 3;
+            int filasEjecutiva = 5;
+            int filasEconomica = 24;
+            crearSeccionAsientos(vuelo, 1, filasPrimera, new char[]{'A', 'C', 'D', 'F'}, "Primera Clase");
+            crearSeccionAsientos(vuelo, filasPrimera + 1, filasEjecutiva, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Ejecutiva");
             crearSeccionAsientos(vuelo, filasPrimera + filasEjecutiva + 1, filasEconomica, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Economica");
         } else {
-            int filasPrimera = random.nextInt(2) + 2; // 2-3 filas primera clase
-            int filasEjecutiva = random.nextInt(3) + 6; // 6-8 filas ejecutiva
-            int filasEconomica = random.nextInt(8) + 28; // 28-35 filas econ
-            crearSeccionAsientos(vuelo, 1, filasPrimera, new char[]{'A', 'D'}, "Primera Clase");
-            crearSeccionAsientos(vuelo, filasPrimera + 1, filasEjecutiva, new char[]{'A', 'C', 'D', 'F'}, "Ejecutiva");
+            int filasPrimera = 3;
+            int filasEjecutiva = 8;
+            int filasEconomica = 30 + random.nextInt(10);
+            crearSeccionAsientos(vuelo, 1, filasPrimera, new char[]{'A', 'C', 'D', 'F'}, "Primera Clase");
+            crearSeccionAsientos(vuelo, filasPrimera + 1, filasEjecutiva, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Ejecutiva");
             crearSeccionAsientos(vuelo, filasPrimera + filasEjecutiva + 1, filasEconomica, new char[]{'A', 'B', 'C', 'D', 'E', 'F'}, "Economica");
         }
         marcarAsientosOcupados(vuelo);
@@ -151,14 +178,30 @@ public class GeneradorVuelos {
         if (categoriaAsientos.isEmpty()) {
             return;
         }
-        int cantidadOcupados = Math.min(5, Math.max(3, 3 + random.nextInt(3)));
-        // No ocupar todos los asientos: dejar al menos uno disponible cuando sea posible
-        int maxOcupables = Math.max(0, categoriaAsientos.size() - 1);
-        cantidadOcupados = Math.min(cantidadOcupados, Math.max(0, maxOcupables));
+        double factorDemanda = calcularFactorDemanda(vuelo);
+        int cantidadOcupados = (int) Math.round(categoriaAsientos.size() * factorDemanda);
+        cantidadOcupados = Math.max(0, Math.min(cantidadOcupados, categoriaAsientos.size() - 1));
         Collections.shuffle(categoriaAsientos);
         for (int i = 0; i < cantidadOcupados; i++) {
             categoriaAsientos.get(i).reservar();
         }
+    }
+
+    private static double calcularFactorDemanda(Vuelo vuelo) {
+        if (vuelo == null) {
+            return 0.12;
+        }
+        long diasHastaVuelo = ChronoUnit.DAYS.between(LocalDate.now(), vuelo.getFecha());
+        if (diasHastaVuelo <= 0) {
+            return 0.28;
+        }
+        if (diasHastaVuelo <= 3) {
+            return 0.24;
+        }
+        if (diasHastaVuelo <= 7) {
+            return 0.18;
+        }
+        return 0.10;
     }
 
     private static Aerolinea obtenerAerolineaAleatoria(String aerolineaFiltro, boolean internacional) {
