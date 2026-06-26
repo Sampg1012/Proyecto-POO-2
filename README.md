@@ -13,7 +13,7 @@ Descripción del proyecto: Proyecto de la asignatura de POO de tercer semestres 
  + Entregable 7: Sustentación del proyecto
 
 📁 Proyecto:
- + [Proyecto]
+ + [Proyecto](https://github.com/Sampg1012/Proyecto-POO-2/tree/82eac7ec7f3346dde9a6649d3e7fd4cfd4ffdbd3/AgenciaViajes)
 
 📁 UML's:
  + [UML del Proyecto](https://github.com/Sampg1012/Proyecto-POO-2/blob/0b26ed63c164c471584ba4f6b01af2c657a1fe02/UML's/UML%20Agencia%20de%20Viajes.pdf)
