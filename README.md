@@ -17,4 +17,4 @@ Descripción del proyecto: Proyecto de la asignatura de POO de tercer semestres 
 
 📁 UML's:
  + [UML del Proyecto](https://github.com/Sampg1012/Proyecto-POO-2/blob/0b26ed63c164c471584ba4f6b01af2c657a1fe02/UML's/UML%20Agencia%20de%20Viajes.pdf)
- + [UML del GUI]
+ + [UML del GUI](https://github.com/Sampg1012/Proyecto-POO-2/blob/2c9d57006f48d8affa0ecf05aa5ee804652aad98/UML's/diagrama%20de%20clases%20frontend.pdf)
