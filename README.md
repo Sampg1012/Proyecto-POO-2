@@ -2,7 +2,11 @@
 ## Agencia de Viajes
 
 Descripción del proyecto: Proyecto de la asignatura de POO de tercer semestres de Ingeneria de sistemas, sobre la creacion de una App de una agencia de viajes.
-kevin Hernandez 6902420035, Samuel Porto Gomez 6902420035, Juan Miguel Ramirez Ortiz 6902420038
+
+🫂Integrantes:
++ kevin Hernandez 6902420020
++ Samuel Porto Gomez 6902420035
++ Juan Miguel Ramirez Ortiz 6902420038
 
 📁 Entregables:
  + [Entregable 1: Diagrama de clases UML con evidencia de comparación entre diseño propio y diseño
