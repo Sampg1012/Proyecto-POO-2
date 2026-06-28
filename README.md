@@ -9,7 +9,7 @@ Descripción del proyecto: Proyecto de la asignatura de POO de tercer semestres 
  + [Entregable 3](https://github.com/Sampg1012/Proyecto-POO-2/blob/e378ee4c67cc1a69676f9f70fcf7af9f374aab51/Entregables/Evidencia%20de%20refinamiento%20de%20prompts.pdf)
  + [Entregable 4]
  + Entregable 5: Aplicación software en Java
- + [Entregable 6]
+ + [Entregable 6](https://github.com/Sampg1012/Proyecto-POO-2/blob/e04f741db4debb5b87a036b3fb170f2e410f678c/Entregables/Documentaci%C3%B3n%20b%C3%A1sica%20del%20sistema.pdf)
  + Entregable 7: Sustentación del proyecto
 
 📁 Proyecto:
